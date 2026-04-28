@@ -4,9 +4,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     git \
     unzip \
     libicu-dev \
+    default-libmysqlclient-dev \
     && curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer \
     && docker-php-ext-configure intl \
-    && docker-php-ext-install -j"$(nproc)" intl opcache \
+    && docker-php-ext-install -j"$(nproc)" intl opcache pdo_mysql \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
