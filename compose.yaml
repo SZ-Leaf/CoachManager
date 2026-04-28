@@ -50,7 +50,7 @@ services:
 
   client:
     build:
-      context: "./coachaManager client"
+      context: "./coachManager client"
       dockerfile: Dockerfile
       target: development
     ports:
@@ -60,7 +60,7 @@ services:
     depends_on:
       - backend
 
-  # Production UI: docker build -f "coachaManager client/Dockerfile" --target production -t coach-client:prod "./coachaManager client"
+  # Production UI: docker build -f "coachManager client/Dockerfile" --target production -t coach-client:prod "./coachManager client"
 
 volumes:
   ###> doctrine/doctrine-bundle ###
