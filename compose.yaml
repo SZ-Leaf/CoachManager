@@ -1,0 +1,30 @@
+# Run from the repo root: docker compose up --build
+# You do not need a separate compose file inside backend/ and client/ unless you want overrides.
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "8080:80"
+    environment:
+      APP_ENV: prod
+      APP_DEBUG: "0"
+      # Set a real secret in production (or use env_file: backend/.env.local)
+      APP_SECRET: ${APP_SECRET:-change-this-secret-in-production}
+
+  client:
+    build:
+      context: "./coachaManager client"
+      dockerfile: Dockerfile
+      target: development
+    ports:
+      - "5173:5173"
+    environment:
+      VITE_API_URL: ${VITE_API_URL:-http://localhost:8080}
+    depends_on:
+      - backend
+
+  # Production UI image (same Dockerfile, target production):
+  # docker build -f "coachaManager client/Dockerfile" --target production -t coach-client:prod "./coachaManager client"
