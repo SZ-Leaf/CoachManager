@@ -24,14 +24,14 @@ COPY . .
 
 # Required so Composer / Symfony scripts during image build do not fail on empty APP_SECRET
 ENV APP_SECRET="docker-build-placeholder-replace-at-runtime"
+ENV APP_ENV=prod
+ENV APP_DEBUG=0
 
 RUN composer dump-autoload --optimize --classmap-authoritative --no-dev \
     && composer run-script --no-dev post-install-cmd \
     && mkdir -p var/cache var/log \
     && chown -R www-data:www-data var
 
-ENV APP_ENV=prod
-ENV APP_DEBUG=0
 # Override APP_SECRET at runtime (e.g. in compose.yaml or your orchestrator)
 
 EXPOSE 80
