@@ -16,6 +16,28 @@ class PlayerRepository extends ServiceEntityRepository
         parent::__construct($registry, Player::class);
     }
 
+    public function findAllPlayers()
+    {
+        $query = $this->createQueryBuilder('player')
+            ->select('player')
+            ->getQuery()
+            ->getResult();
+
+            return $query;
+    }
+
+    public function findOnePlayerById(int $id): ?Player
+    {
+        $query = $this->createQueryBuilder('player')
+            ->select('player')
+            ->where('player.id = :id')
+            ->setParameter('id', $id)
+            ->getQuery()
+            ->getOneOrNullResult();
+
+        return $query;
+    }
+
     //    /**
     //     * @return Player[] Returns an array of Player objects
     //     */
