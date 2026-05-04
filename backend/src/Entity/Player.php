@@ -73,6 +73,8 @@ class Player
     {
         $this->attendances = new ArrayCollection();
         $this->communications = new ArrayCollection();
+        $this->createdAt = new \DateTimeImmutable();
+        $this->updatedAt = new \DateTimeImmutable();
     }
 
     public function getId(): ?int
