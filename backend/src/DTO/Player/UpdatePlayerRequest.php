@@ -2,10 +2,10 @@
 
 namespace App\DTO\Player;
 
-class CreatePlayerRequest
+class UpdatePlayerRequest
 {
-    public string $firstname = '';
-    public string $lastname = '';
+    public ?string $firstname = null;
+    public ?string $lastname = null;
     public ?string $email = null;
     public ?string $phoneNumber = null;
     public ?string $emergencyName = null;
