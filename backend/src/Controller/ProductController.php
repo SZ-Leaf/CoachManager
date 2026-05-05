@@ -3,8 +3,11 @@
 namespace App\Controller;
 
 use App\DTO\Product\CreateProductRequest;
+use App\DTO\Product\UpdateProductRequest;
 use App\Exceptions\Product\CreateProductException;
+use App\Exceptions\Product\UpdateProductException;
 use App\Services\Product\CreateProductService;
+use App\Services\Product\UpdateProductService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -33,6 +36,35 @@ final class ProductController extends AbstractController
         } catch (CreateProductException $e) {
             $status = match ($e->getCode()) {
                 CreateProductException::VALIDATION_FAILED => Response::HTTP_BAD_REQUEST,
+                default => Response::HTTP_BAD_REQUEST,
+            };
+
+            return $this->json([
+                'message' => $e->getMessage(),
+            ], $status);
+        }
+    }
+
+    #[Route('/{id}', name: 'product_update', requirements: ['id' => '\\d+'], methods: ['PUT', 'PATCH'])]
+    public function update(int $id, Request $request, UpdateProductService $updateProductService): JsonResponse
+    {
+        try {
+            $payload = $request->toArray();
+
+            $dto = new UpdateProductRequest();
+            $dto->name = $payload['name'] ?? '';
+            $qty = $payload['quantity'] ?? null;
+            $dto->quantity = is_int($qty)
+                ? $qty
+                : (is_numeric($qty) ? (int) $qty : null);
+
+            $result = $updateProductService->update($id, $dto);
+
+            return $this->json($result, Response::HTTP_OK);
+        } catch (UpdateProductException $e) {
+            $status = match ($e->getCode()) {
+                UpdateProductException::VALIDATION_FAILED => Response::HTTP_BAD_REQUEST,
+                UpdateProductException::NOT_FOUND => Response::HTTP_NOT_FOUND,
                 default => Response::HTTP_BAD_REQUEST,
             };
 
