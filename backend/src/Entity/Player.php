@@ -23,14 +23,14 @@ class Player
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $emergencyEmail = null;
 
-    #[ORM\Column(nullable: true)]
-    private ?int $emergencyPhoneNumber = null;
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $emergencyPhoneNumber = null;
 
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $email = null;
 
-    #[ORM\Column(nullable: true)]
-    private ?int $phoneNumber = null;
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $phoneNumber = null;
 
     #[ORM\Column(length: 255)]
     private ?string $lastname = null;
@@ -106,12 +106,12 @@ class Player
         return $this;
     }
 
-    public function getEmergencyPhoneNumber(): ?int
+    public function getEmergencyPhoneNumber(): ?string
     {
         return $this->emergencyPhoneNumber;
     }
 
-    public function setEmergencyPhoneNumber(?int $emergencyPhoneNumber): static
+    public function setEmergencyPhoneNumber(?string $emergencyPhoneNumber): static
     {
         $this->emergencyPhoneNumber = $emergencyPhoneNumber;
 
@@ -130,12 +130,12 @@ class Player
         return $this;
     }
 
-    public function getPhoneNumber(): ?int
+    public function getPhoneNumber(): ?string
     {
         return $this->phoneNumber;
     }
 
-    public function setPhoneNumber(?int $phoneNumber): static
+    public function setPhoneNumber(?string $phoneNumber): static
     {
         $this->phoneNumber = $phoneNumber;
 
