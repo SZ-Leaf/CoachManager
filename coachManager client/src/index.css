@@ -14,9 +14,15 @@
   --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
   --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
   --mono: ui-monospace, Consolas, monospace;
+  --bp-sm: 480px;
+  --bp-md: 640px;
+  --bp-lg: 768px;
+  --bp-xl: 1025px;
+  --bp-2xl: 1126px;
 
-  font: 18px/145% var(--sans);
-  letter-spacing: 0.18px;
+  /* mobile first : taille de base plus lisible sur petit écran */
+  font: 16px/145% var(--sans);
+  letter-spacing: 0.12px;
   color-scheme: light dark;
   color: var(--text);
   background: var(--bg);
@@ -24,9 +30,12 @@
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
 
-  @media (max-width: 1024px) {
-    font-size: 16px;
+@media (min-width: 768px) {
+  :root {
+    font-size: 18px;
+    letter-spacing: 0.18px;
   }
 }
 
@@ -55,15 +64,27 @@ body {
 }
 
 #root {
-  width: 1126px;
+  width: 100%;
   max-width: 100%;
   margin: 0 auto;
   text-align: center;
-  border-inline: 1px solid var(--border);
+  border-inline: none;
   min-height: 100svh;
   display: flex;
   flex-direction: column;
   box-sizing: border-box;
+}
+
+@media (min-width: 480px) {
+  #root {
+    border-inline: 1px solid var(--border);
+  }
+}
+
+@media (min-width: 1126px) {
+  #root {
+    max-width: 1126px;
+  }
 }
 
 h1,
@@ -74,23 +95,45 @@ h2 {
 }
 
 h1 {
-  font-size: 56px;
-  letter-spacing: -1.68px;
-  margin: 32px 0;
-  @media (max-width: 1024px) {
-    font-size: 36px;
-    margin: 20px 0;
+  font-size: 2rem;
+  letter-spacing: -0.05em;
+  margin: 1.25rem 0;
+}
+
+@media (min-width: 640px) {
+  h1 {
+    font-size: 2.25rem;
   }
 }
+
+@media (min-width: 1024px) {
+  h1 {
+    font-size: 3.5rem;
+    letter-spacing: -0.03em;
+    margin: 2rem 0;
+  }
+}
+
 h2 {
-  font-size: 24px;
+  font-size: 1.15rem;
   line-height: 118%;
-  letter-spacing: -0.24px;
+  letter-spacing: -0.02em;
   margin: 0 0 8px;
-  @media (max-width: 1024px) {
-    font-size: 20px;
+}
+
+@media (min-width: 640px) {
+  h2 {
+    font-size: 1.25rem;
   }
 }
+
+@media (min-width: 1024px) {
+  h2 {
+    font-size: 1.5rem;
+    letter-spacing: -0.015em;
+  }
+}
+
 p {
   margin: 0;
 }
@@ -104,10 +147,16 @@ code,
 }
 
 code {
-  font-size: 15px;
+  font-size: 0.9rem;
   line-height: 135%;
   padding: 4px 8px;
   background: var(--code-bg);
+}
+
+@media (min-width: 768px) {
+  code {
+    font-size: 15px;
+  }
 }
 
 /* —— UI feedback (Alert, Toast, Spinner, Skeleton, EmptyState) —— */
@@ -170,19 +219,28 @@ code {
 
 .feedback-toast {
   position: fixed;
-  bottom: 24px;
-  right: 24px;
   z-index: 1000;
   display: flex;
   align-items: center;
   gap: 12px;
-  max-width: min(420px, calc(100vw - 48px));
   padding: 12px 14px;
   border-radius: 8px;
   border: 1px solid var(--border);
   box-shadow: var(--shadow);
   text-align: left;
   background: var(--bg);
+  inset-inline: 12px;
+  bottom: max(12px, env(safe-area-inset-bottom, 0px));
+  max-width: none;
+}
+
+@media (min-width: 480px) {
+  .feedback-toast {
+    inset-inline: auto 24px;
+    left: auto;
+    bottom: 24px;
+    max-width: min(420px, calc(100vw - 48px));
+  }
 }
 
 .feedback-toast__message {
@@ -290,11 +348,17 @@ code {
 }
 
 .feedback-empty {
-  padding: 24px 16px;
+  padding: 20px 14px;
   border: 1px dashed var(--border);
   border-radius: 8px;
   text-align: center;
   color: var(--text);
+}
+
+@media (min-width: 640px) {
+  .feedback-empty {
+    padding: 24px 16px;
+  }
 }
 
 .feedback-empty__title {
