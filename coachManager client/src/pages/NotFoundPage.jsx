@@ -6,10 +6,10 @@ const NotFoundPage = () => (
   <div className="not-found-page">
     <h1 className="not-found-page__title">Page introuvable</h1>
     <p className="not-found-page__text">
-      La page demandée n&apos;existe pas ou a été déplacée.
+      La page demandée n'existe pas ou a été déplacée.
     </p>
     <Link to="/" className="not-found-page__link">
-      Retour à l&apos;accueil
+      Retour à l'accueil
     </Link>
   </div>
 );
