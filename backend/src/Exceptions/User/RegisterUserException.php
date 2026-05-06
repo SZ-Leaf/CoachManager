@@ -7,27 +7,32 @@ use RuntimeException;
 final class RegisterUserException extends RuntimeException
 {
    public const EMAIL_EXISTS = 1001;
-   public const PASSWORD_INVALID = 1002;
-   public const PASSWORD_COMPROMISED = 1003;
    public const VALIDATION_FAILED = 1004;
+
+   public function __construct(
+      string $message,
+      int $code,
+      private readonly array $errors = []
+   ) {
+      parent::__construct($message, $code);
+   }
+
+   public function getErrors(): array
+   {
+      return $this->errors;
+   }
+
+   public static function validationFailed(array $errors): self
+   {
+      return new self(
+         'Validation failed',
+         self::VALIDATION_FAILED,
+         $errors
+      );
+   }
 
    public static function emailExists(): self
    {
       return new self('L\'email existe déjà', self::EMAIL_EXISTS);
-   }
-
-   public static function passwordInvalid(): self
-   {
-      return new self('Le mot de passe est invalide, il doit contenir au moins une lettre majuscule et un chiffre', self::PASSWORD_INVALID);
-   }
-
-   public static function passwordCompromised(): self
-   {
-      return new self('Le mot de passe est compromis', self::PASSWORD_COMPROMISED);
-   }
-
-   public static function validationFailed(string $message): self
-   {
-      return new self($message, self::VALIDATION_FAILED);
    }
 }

@@ -2,66 +2,74 @@
 
 namespace App\Services\User;
 
-use App\DTO\User\RegisterUserRequest;
+use App\DTO\User\UpdateUserRequest;
 use App\Entity\User;
 use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
-use App\Exceptions\User\RegisterUserException;
+use App\Exceptions\User\UpdateUserException;
 use Symfony\Component\Validator\Constraints as Assert;
 
-class RegisterUserService
+class UpdateUserService
 {
    public function __construct(
       private readonly EntityManagerInterface $em,
       private readonly UserRepository $userRepository,
       private readonly UserPasswordHasherInterface $hasher,
       private readonly ValidatorInterface $validator,
-
    ) {}
 
    /**
-    * @throws RegisterUserException 
+    * @throws UpdateUserException
     */
-   public function registerUser(RegisterUserRequest $dto): array
+   public function updateUser(int $id, UpdateUserRequest $dto)
    {
-      // DTO Validation
       $violations = $this->validator->validate($dto);
-
       if (count($violations) > 0) {
          $errors = [];
-
          foreach ($violations as $v) {
             $errors[] = [
                'field' => $v->getPropertyPath(),
                'message' => $v->getMessage(),
             ];
          }
-
-         throw RegisterUserException::validationFailed($errors);
+         throw UpdateUserException::validationFailed($errors);
       }
 
-      if ($this->userRepository->findOneBy(['email' => $dto->email])) {
-         throw RegisterUserException::emailExists();
+      $user = $this->userRepository->find($id);
+      if(!$user) {
+         throw UpdateUserException::notFound();
+      }
+
+      if ($dto->firstname !== null) {
+         $user->setFirstname($dto->firstname);
       }
       
-      $user = new User();
-      $user->setFirstname($dto->firstname);
-      $user->setLastname($dto->lastname);
-      $user->setEmail($dto->email);
-      $user->setPassword($this->hasher->hashPassword($user, $dto->password));
-      $user->setAvatar($dto->avatar);
-      $user->setCreatedAt(new \DateTimeImmutable());
-      $user->setUpdatedAt(new \DateTimeImmutable());
+      if ($dto->lastname !== null) {
+         $user->setLastname($dto->lastname);
+      }
+      
+      if ($dto->avatar !== null) {
+         $user->setAvatar($dto->avatar);
+      }
+      
+      if ($dto->password !== null) {
+         $user->setPassword(
+            $this->hasher->hashPassword($user, $dto->password)
+         );
+      }
 
-      $this->em->persist($user);
+      $user->setUpdatedAt(new \DateTimeImmutable());
+      
       $this->em->flush();
 
       return [
-         'email' => $user->getEmail(),
          'firstname' => $user->getFirstname(),
          'lastname' => $user->getLastname(),
+         'email' => $user->getEmail(),
+         'avatar' => $user->getAvatar(),
+         'updatedAt' => $user->getUpdatedAt(),
       ];
    }
 }
