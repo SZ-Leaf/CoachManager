@@ -20,8 +20,6 @@ const RegisterForm = () => {
 
   return (
     <form className="register-form" onSubmit={handleSubmit}>
-      <h2>Inscription</h2>
-
       <div>
         <label htmlFor="firstname">Prénom</label>
         <input

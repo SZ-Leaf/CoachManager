@@ -1,3 +1,34 @@
+.auth-shell {
+  min-height: 100svh;
+}
+
+.auth-modal__footer {
+  margin: 0.85rem 0 0;
+  padding-top: 0.85rem;
+  border-top: 1px solid var(--border);
+  font-size: 0.88rem;
+  color: var(--text);
+  text-align: center;
+}
+
+@media (min-width: 640px) {
+  .auth-modal__footer {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    font-size: 0.9rem;
+  }
+}
+
+.auth-modal__footer a {
+  color: var(--accent);
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.auth-modal__footer a:hover {
+  text-decoration: underline;
+}
+
 .auth-page {
   min-height: 100svh;
   box-sizing: border-box;
@@ -120,19 +151,6 @@
   .login-form,
   .register-form {
     gap: 1rem;
-  }
-}
-
-.login-form h2,
-.register-form h2 {
-  margin: 0 0 0.25rem;
-  font-size: 1.12rem;
-}
-
-@media (min-width: 640px) {
-  .login-form h2,
-  .register-form h2 {
-    font-size: 1.25rem;
   }
 }
 

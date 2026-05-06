@@ -1,5 +1,7 @@
 import { useEffect } from 'react';
 
+import './modal.css';
+
 const Modal = ({ isOpen, onClose, title, children }) => {
   useEffect(() => {
     const handleKeyDown = (e) => {

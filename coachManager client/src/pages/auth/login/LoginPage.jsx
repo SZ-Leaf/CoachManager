@@ -1,21 +1,25 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 import LoginForm from '../../../components/ui/forms/auth/LoginForm.jsx';
+import Modal from '../../../components/ui/modals/Modal.jsx';
 import './login.css';
 
 const LoginPage = () => {
+  const navigate = useNavigate();
+
   return (
-    <div className="auth-page">
-      <header className="auth-page__header">
-        <h1 className="auth-page__title">CoachManager</h1>
-        <p className="auth-page__tagline">Connexion à votre espace</p>
-      </header>
-      <main className="auth-page__main">
+    <div className="auth-shell">
+      <Modal
+        isOpen
+        title="Connexion"
+        onClose={() => navigate('/')}
+      >
         <LoginForm />
-      </main>
-      <p className="auth-page__footer">
-        Pas encore de compte ? <Link to="/register">Créer un compte</Link>
-      </p>
+        <p className="auth-modal__footer">
+          Pas encore de compte ?{' '}
+          <Link to="/register">Créer un compte</Link>
+        </p>
+      </Modal>
     </div>
   );
 };
