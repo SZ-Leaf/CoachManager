@@ -1,3 +1,4 @@
+import { NavLink } from 'react-router-dom';
 import { LAYOUT_NAV_LINKS } from './navigation.js';
 
 const Sidebar = ({ open, onNavigate }) => {
@@ -16,11 +17,15 @@ const Sidebar = ({ open, onNavigate }) => {
       >
         <nav>
           <ul>
-            {LAYOUT_NAV_LINKS.map(({ href, label }) => (
+            {LAYOUT_NAV_LINKS.map(({ to, label }) => (
               <li key={label}>
-                <a href={href} onClick={onNavigate}>
+                <NavLink
+                  to={to}
+                  onClick={onNavigate}
+                  className={({ isActive }) => (isActive ? 'is-active' : undefined)}
+                >
                   {label}
-                </a>
+                </NavLink>
               </li>
             ))}
           </ul>

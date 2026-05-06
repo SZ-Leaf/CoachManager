@@ -116,8 +116,18 @@
   background: var(--code-bg);
 }
 
+.layout-header__nav a.is-active {
+  color: var(--text-h);
+  background: var(--code-bg);
+  font-weight: 500;
+}
+
 .layout-header__actions {
   margin-left: auto;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px 12px;
 }
 
 .layout-header__account {
@@ -131,6 +141,34 @@
   text-decoration: underline;
 }
 
+.layout-header__account--ghost {
+  color: var(--text);
+  padding: 6px 8px;
+  margin: -6px -8px;
+  border-radius: 6px;
+}
+
+.layout-header__account--ghost:hover {
+  color: var(--text-h);
+  text-decoration: none;
+  background: var(--code-bg);
+}
+
+.layout-header__register {
+  font-size: 0.9rem;
+  color: var(--text-h);
+  text-decoration: none;
+  font-weight: 500;
+  padding: 8px 14px;
+  border-radius: 8px;
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+}
+
+.layout-header__register:hover {
+  background: var(--border);
+}
+
 @media (max-width: 1024px) {
   .layout-header__menu-btn {
     display: inline-flex;
@@ -140,8 +178,26 @@
     display: none;
   }
 
+  .layout-header--standalone .layout-header__menu-btn {
+    display: none;
+  }
+
+  .layout-header--standalone .layout-header__nav {
+    display: block;
+  }
+
+  .layout-header--standalone .layout-header__nav ul {
+    justify-content: flex-start;
+    gap: 2px 8px;
+  }
+
   .layout-header {
     flex-wrap: nowrap;
+  }
+
+  .layout-header--standalone {
+    flex-wrap: wrap;
+    row-gap: 12px;
   }
 }
 
@@ -189,6 +245,12 @@
   color: var(--text-h);
 }
 
+.layout-sidebar nav a.is-active {
+  background: var(--code-bg);
+  color: var(--text-h);
+  font-weight: 500;
+}
+
 @media (max-width: 1024px) {
   .layout-sidebar {
     position: fixed;
@@ -215,6 +277,39 @@
     max-height: calc(100svh - 57px);
     overflow-y: auto;
   }
+}
+
+/* —— Pages applicatives —— */
+.app-page__header {
+  margin-bottom: 24px;
+}
+
+.app-page__title {
+  margin: 0 0 8px;
+  font-size: 1.65rem;
+  font-weight: 600;
+  color: var(--text-h);
+  letter-spacing: -0.02em;
+}
+
+.app-page__description {
+  margin: 0;
+  color: var(--text);
+  line-height: 1.5;
+  max-width: 40rem;
+}
+
+.app-page__content {
+  max-width: 56rem;
+}
+
+.app-page__placeholder {
+  margin: 0;
+  padding: 24px;
+  border: 1px dashed var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  text-align: center;
 }
 
 /* —— Footer —— */

@@ -1,18 +1,29 @@
+import { Link } from 'react-router-dom';
+import Header from '../../components/layout/Header.jsx';
+import '../../components/layout/layout.css';
 import './home.css';
 
 const HomePage = () => {
   return (
-    <div className="home">
-      <header className="home__header">
-        <h1 className="home__title">CoachManager</h1>
-        <p className="home__tagline">Homepage — step 1 (routes de test)</p>
-      </header>
-      <main className="home__main">
-        <p className="home__text">
-          Si vous voyez cette page sur, le routage fonctionne.
-        </p>
-      </main>
-    </div>
+    <>
+      <div className="home-minimal__header">
+        <Header />
+      </div>
+      <div className="home-minimal">
+        <main className="home-hero">
+          <h1 className="hero-title">Gérez votre équipe, simplement.</h1>
+          <p className="hero-subtitle">
+            L'outil de gestion d'entraînement minimaliste pour les
+            coachs exigeants.
+          </p>
+          <div className="hero-cta">
+            <Link to="/register" className="cta-primary">
+              Commencer maintenant
+            </Link>
+          </div>
+        </main>
+      </div>
+    </>
   );
 };
 
