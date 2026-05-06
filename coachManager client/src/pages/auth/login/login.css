@@ -1,0 +1,208 @@
+.auth-page {
+  min-height: 100svh;
+  box-sizing: border-box;
+  padding: 1.25rem 1rem max(1.25rem, env(safe-area-inset-bottom));
+  max-width: 28rem;
+  margin: 0 auto;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+@media (min-width: 480px) {
+  .auth-page {
+    padding: 1.75rem 1.25rem;
+  }
+}
+
+@media (min-width: 640px) {
+  .auth-page {
+    padding: 2rem 1.5rem;
+  }
+}
+
+.auth-page__header {
+  margin-bottom: 1.1rem;
+}
+
+@media (min-width: 640px) {
+  .auth-page__header {
+    margin-bottom: 1.25rem;
+  }
+}
+
+.auth-page__title {
+  margin: 0 0 0.35rem;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--text-h);
+  letter-spacing: -0.02em;
+}
+
+@media (min-width: 480px) {
+  .auth-page__title {
+    font-size: 1.65rem;
+  }
+}
+
+@media (min-width: 640px) {
+  .auth-page__title {
+    font-size: 1.75rem;
+  }
+}
+
+.auth-page__tagline {
+  margin: 0;
+  font-size: 0.92rem;
+  color: var(--text);
+}
+
+@media (min-width: 640px) {
+  .auth-page__tagline {
+    font-size: 0.95rem;
+  }
+}
+
+.auth-page__main {
+  padding: 1rem 1.05rem;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--bg);
+  box-shadow: var(--shadow);
+}
+
+@media (min-width: 480px) {
+  .auth-page__main {
+    padding: 1.15rem 1.2rem;
+  }
+}
+
+@media (min-width: 640px) {
+  .auth-page__main {
+    padding: 1.25rem;
+  }
+}
+
+.auth-page__footer {
+  margin-top: 1.1rem;
+  font-size: 0.88rem;
+  color: var(--text);
+  text-align: center;
+}
+
+@media (min-width: 640px) {
+  .auth-page__footer {
+    margin-top: 1.25rem;
+    font-size: 0.9rem;
+  }
+}
+
+.auth-page__footer a {
+  color: var(--accent);
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.auth-page__footer a:hover {
+  text-decoration: underline;
+}
+
+.login-form,
+.register-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  text-align: left;
+}
+
+@media (min-width: 640px) {
+  .login-form,
+  .register-form {
+    gap: 1rem;
+  }
+}
+
+.login-form h2,
+.register-form h2 {
+  margin: 0 0 0.25rem;
+  font-size: 1.12rem;
+}
+
+@media (min-width: 640px) {
+  .login-form h2,
+  .register-form h2 {
+    font-size: 1.25rem;
+  }
+}
+
+.login-form > div,
+.register-form > div {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.login-form label,
+.register-form label {
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: var(--text-h);
+}
+
+@media (min-width: 640px) {
+  .login-form label,
+  .register-form label {
+    font-size: 0.9rem;
+  }
+}
+
+.login-form input,
+.register-form input {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 44px;
+  padding: 0.55rem 0.65rem;
+  font: inherit;
+  color: var(--text-h);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  transition:
+    border-color 0.15s,
+    box-shadow 0.15s;
+}
+
+.login-form input:focus,
+.register-form input:focus {
+  outline: none;
+  border-color: var(--accent-border);
+  box-shadow: 0 0 0 3px var(--accent-bg);
+}
+
+.login-form button[type='submit'],
+.register-form button[type='submit'] {
+  margin-top: 0.25rem;
+  padding: 0.7rem 1rem;
+  min-height: 48px;
+  font: inherit;
+  font-weight: 600;
+  color: #fff;
+  background: var(--accent);
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition:
+    filter 0.15s,
+    transform 0.1s;
+}
+
+.login-form button[type='submit']:hover,
+.register-form button[type='submit']:hover {
+  filter: brightness(1.06);
+}
+
+.login-form button[type='submit']:active,
+.register-form button[type='submit']:active {
+  transform: translateY(1px);
+}
