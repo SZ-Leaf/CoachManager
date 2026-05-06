@@ -6,8 +6,12 @@ use App\DTO\Player\CreatePlayerRequest;
 use App\Entity\Player;
 use App\Enum\PlayerPosition;
 use App\Enum\PlayerStatus;
+use App\Exceptions\Player\CreatePlayerException;
 use App\Repository\TeamRepository;
+use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
+use Exception;
+use ValueError;
 
 class CreatePlayerService
 {
@@ -19,7 +23,7 @@ class CreatePlayerService
     public function create(CreatePlayerRequest $dto): array
     {
         if (empty($dto->firstname) || empty($dto->lastname)) {
-            throw new \InvalidArgumentException('Firstname and lastname are required');
+            throw CreatePlayerException::validationFailed('Firstname and lastname are required');
         }
 
         $player = new Player();
@@ -34,22 +38,34 @@ class CreatePlayerService
         $player->setRating($dto->rating);
 
         if ($dto->birthday !== null) {
-            $player->setBirthday(new \DateTimeImmutable($dto->birthday));
+            try {
+                $player->setBirthday(new DateTimeImmutable($dto->birthday));
+            } catch (Exception) {
+                throw CreatePlayerException::invalidBirthday();
+            }
         }
 
         if ($dto->position !== null) {
-            $player->setPosition(PlayerPosition::from($dto->position));
+            try {
+                $player->setPosition(PlayerPosition::from($dto->position));
+            } catch (ValueError) {
+                throw CreatePlayerException::invalidPosition();
+            }
         }
 
         if ($dto->status !== null) {
-            $player->setStatus(PlayerStatus::from($dto->status));
+            try {
+                $player->setStatus(PlayerStatus::from($dto->status));
+            } catch (ValueError) {
+                throw CreatePlayerException::invalidStatus();
+            }
         }
 
         if ($dto->teamId !== null) {
             $team = $this->teamRepository->find($dto->teamId);
 
             if (!$team) {
-                throw new \InvalidArgumentException('Team not found');
+                throw CreatePlayerException::teamNotFound();
             }
 
             $player->setTeam($team);

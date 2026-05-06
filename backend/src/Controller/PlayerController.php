@@ -5,6 +5,9 @@ namespace App\Controller;
 use App\DTO\Player\CreatePlayerRequest;
 use App\DTO\Player\UpdatePlayerRequest;
 use App\Entity\Player;
+use App\Exceptions\Player\CreatePlayerException;
+use App\Exceptions\Player\UpdatePlayerException;
+use App\Exceptions\Player\DeletePlayerException;
 use App\Repository\PlayerRepository;
 use App\Services\Player\CreatePlayerService;
 use App\Services\Player\DeletePlayerService;
@@ -70,15 +73,20 @@ final class PlayerController extends AbstractController
             $result = $createPlayerService->create($dto);
 
             return $this->json($result, Response::HTTP_CREATED);
-        } catch (\Throwable $e) {
+        } catch (CreatePlayerException $e) {
             return $this->json([
                 'message' => $e->getMessage(),
+                'code' => $e->getCode(),
             ], Response::HTTP_BAD_REQUEST);
+        } catch (\Throwable $e) {
+            return $this->json([
+                'message' => 'Une erreur est survenue',
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 
     #[Route('/edit/{id}', name: 'player_edit', methods:['POST'], requirements: ['id' => '\d+'])]
-    public function edit(Request $request, Player $player, EntityManagerInterface $em, UpdatePlayerService $updatePlayerService)
+    public function edit(Request $request, Player $player, UpdatePlayerService $updatePlayerService)
     {
         try {
             $payload = $request->toArray();
@@ -101,18 +109,34 @@ final class PlayerController extends AbstractController
             $result = $updatePlayerService->update($player, $dto);
 
             return $this->json($result);
-        } catch (\Throwable $e) {
-            return $this->json([
-                'message' => $e->getMessage(),
-            ], Response::HTTP_BAD_REQUEST);
-        }
+        } catch (UpdatePlayerException $e) {
+        return $this->json([
+            'message' => $e->getMessage(),
+            'code' => $e->getCode(),
+        ], Response::HTTP_BAD_REQUEST);
+    } catch (\Throwable $e) {
+        return $this->json([
+            'message' => 'Une erreur est survenue',
+        ], Response::HTTP_INTERNAL_SERVER_ERROR);
+    }
     }
 
     #[Route('/delete/{id}', name: 'player_delete', methods:['POST'], requirements: ['id' => '\d+'])]
-    public function delete(Player $player, DeletePlayerService $deletePlayerService): JsonResponse
+    public function delete(Player $player, DeletePlayerService $deletePlayerService): JsonResponse 
     {
-        $result = $deletePlayerService->delete($player);
+        try {
+            $result = $deletePlayerService->delete($player);
 
-        return $this->json($result);
+            return $this->json($result);
+        } catch (DeletePlayerException $e) {
+            return $this->json([
+                'message' => $e->getMessage(),
+                'code' => $e->getCode(),
+            ], Response::HTTP_BAD_REQUEST);
+        } catch (\Throwable $e) {
+            return $this->json([
+                'message' => 'Une erreur est survenue',
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
     }
 }
