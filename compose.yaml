@@ -41,6 +41,8 @@ services:
       - "8080:80" # Symfony API (browser: http://localhost:8080)
     volumes:
       - ./backend:/var/www/html
+      - /var/www/html/var
+      - /var/www/html/vendor
     environment:
       APP_ENV: dev
       APP_DEBUG: "1"
@@ -55,10 +57,14 @@ services:
       context: "./coachManager client"
       dockerfile: Dockerfile
       target: development
+    volumes:
+      - ./coachManager client:/app
+      - /app/node_modules
     ports:
       - "5173:5173"
     environment:
       VITE_API_URL: ${VITE_API_URL:-http://localhost:8080}
+      CHOKIDAR_USEPOLLING: "true"
     depends_on:
       - backend
 
