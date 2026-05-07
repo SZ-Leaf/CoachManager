@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\Product;
+use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -16,28 +17,33 @@ class ProductRepository extends ServiceEntityRepository
         parent::__construct($registry, Product::class);
     }
 
-    //    /**
-    //     * @return Product[] Returns an array of Product objects
-    //     */
-    //    public function findByExampleField($value): array
-    //    {
-    //        return $this->createQueryBuilder('p')
-    //            ->andWhere('p.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->orderBy('p.id', 'ASC')
-    //            ->setMaxResults(10)
-    //            ->getQuery()
-    //            ->getResult()
-    //        ;
-    //    }
+    /**
+     * @return list<Product>
+     */
+    public function findAllForCoach(User $coach): array
+    {
+        return $this->createQueryBuilder('p')
+            ->innerJoin('p.itemList', 'il')
+            ->innerJoin('il.inventory', 'inv')
+            ->innerJoin('inv.team', 'team')
+            ->andWhere('team.coach = :coach')
+            ->setParameter('coach', $coach)
+            ->orderBy('p.id', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
 
-    //    public function findOneBySomeField($value): ?Product
-    //    {
-    //        return $this->createQueryBuilder('p')
-    //            ->andWhere('p.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->getQuery()
-    //            ->getOneOrNullResult()
-    //        ;
-    //    }
+    public function findOneByIdForCoach(int $id, User $coach): ?Product
+    {
+        return $this->createQueryBuilder('p')
+            ->innerJoin('p.itemList', 'il')
+            ->innerJoin('il.inventory', 'inv')
+            ->innerJoin('inv.team', 'team')
+            ->andWhere('p.id = :id')
+            ->andWhere('team.coach = :coach')
+            ->setParameter('id', $id)
+            ->setParameter('coach', $coach)
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
 }

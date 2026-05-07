@@ -6,13 +6,13 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 class UpdateUserRequest
 {
-   #[Assert\Length(min: 3, allowNull: true)]
+   #[Assert\Length(min: 3)]
    public ?string $firstname = null;
 
-   #[Assert\Length(min: 3, allowNull: true)]
+   #[Assert\Length(min: 3)]
    public ?string $lastname = null;
-   
-   #[Assert\Length(min: 8, allowNull: true)]
+
+   #[Assert\Length(min: 8)]
    #[Assert\NotCompromisedPassword(
       message: 'Le mot de passe est compromis.'
    )]
@@ -22,9 +22,6 @@ class UpdateUserRequest
    )]
    public ?string $password = null;
 
-   #[Assert\Length(max: 2048, allowNull: true)]
-   #[Assert\Url(
-      message: 'Invalid avatar URL.'
-   )]
+   #[Assert\Length(max: 2048)]
    public ?string $avatar = null;
 }

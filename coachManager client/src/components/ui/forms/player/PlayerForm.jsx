@@ -1,23 +1,51 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
-const POSITIONS = ['goalkeeper', 'defender', 'midfielder', 'forward', 'other'];
-const STATUSES = ['active', 'injured', 'suspended', 'inactive'];
+const POSITIONS = [
+  { value: 'goalkeeper', label: 'Gardien' },
+  { value: 'defender', label: 'Défenseur' },
+  { value: 'midfielder', label: 'Milieu' },
+  { value: 'forward', label: 'Attaquant' },
+  { value: 'other', label: 'Autre' },
+];
+const STATUSES = [
+  { value: 'active', label: 'Actif' },
+  { value: 'injured', label: 'Blessé' },
+  { value: 'suspended', label: 'Suspendu' },
+  { value: 'inactive', label: 'Inactif' },
+];
 
-const PlayerForm = () => {
-  const [formData, setFormData] = useState({
+function fieldError(serverErrors, field) {
+  const row = serverErrors?.find((e) => e.field === field);
+  return row?.message;
+}
+
+export default function PlayerForm({
+  teams = [],
+  initialValues = {},
+  onSubmit,
+  isSubmitting = false,
+  serverErrors = [],
+}) {
+  const [formData, setFormData] = useState(() => ({
     firstname: '',
     lastname: '',
     email: '',
-    phone_number: '',
+    phoneNumber: '',
     birthday: '',
     avatar: '',
     position: '',
     status: '',
     rating: '',
-    emergency_name: '',
-    emergency_email: '',
-    emergency_phone_number: '',
-  });
+    emergencyName: '',
+    emergencyEmail: '',
+    emergencyPhoneNumber: '',
+    teamId: '',
+    ...initialValues,
+  }));
+
+  useEffect(() => {
+    setFormData((prev) => ({ ...prev, ...initialValues }));
+  }, [initialValues]);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -25,172 +53,174 @@ const PlayerForm = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log(formData);
+    const payload = {
+      firstname: formData.firstname,
+      lastname: formData.lastname,
+      email: formData.email || null,
+      phoneNumber: formData.phoneNumber || null,
+      birthday: formData.birthday || null,
+      avatar: formData.avatar || null,
+      position: formData.position || null,
+      status: formData.status || null,
+      rating: formData.rating === '' ? null : Number(formData.rating),
+      emergencyName: formData.emergencyName || null,
+      emergencyEmail: formData.emergencyEmail || null,
+      emergencyPhoneNumber: formData.emergencyPhoneNumber || null,
+      teamId: formData.teamId ? Number(formData.teamId) : null,
+    };
+    onSubmit(payload);
   };
 
   return (
-    <form className="player-form" onSubmit={handleSubmit}>
-      <h2>Ajouter / Modifier un Joueur</h2>
-
+    <form className="player-form crud-form" onSubmit={handleSubmit}>
       <fieldset>
         <legend>Informations personnelles</legend>
-
-        <div>
-          <label htmlFor="firstname">Prénom</label>
+        <label>
+          Prénom *
           <input
-            id="firstname"
-            type="text"
             name="firstname"
             value={formData.firstname}
             onChange={handleChange}
             required
           />
-        </div>
-
-        <div>
-          <label htmlFor="lastname">Nom</label>
+        </label>
+        <label>
+          Nom *
           <input
-            id="lastname"
-            type="text"
             name="lastname"
             value={formData.lastname}
             onChange={handleChange}
             required
           />
-        </div>
-
-        <div>
-          <label htmlFor="email">Email</label>
+        </label>
+        <label>
+          Email
           <input
-            id="email"
             type="email"
             name="email"
             value={formData.email}
             onChange={handleChange}
           />
-        </div>
-
-        <div>
-          <label htmlFor="phone_number">Téléphone</label>
+        </label>
+        <label>
+          Téléphone
           <input
-            id="phone_number"
             type="tel"
-            name="phone_number"
-            value={formData.phone_number}
+            name="phoneNumber"
+            value={formData.phoneNumber}
             onChange={handleChange}
           />
-        </div>
-
-        <div>
-          <label htmlFor="birthday">Date de naissance</label>
+        </label>
+        <label>
+          Date de naissance
           <input
-            id="birthday"
             type="date"
             name="birthday"
             value={formData.birthday}
             onChange={handleChange}
           />
-        </div>
-
-        <div>
-          <label htmlFor="avatar">Avatar (URL)</label>
-          <input
-            id="avatar"
-            type="text"
-            name="avatar"
-            value={formData.avatar}
-            onChange={handleChange}
-          />
-        </div>
+        </label>
+        <label>
+          Avatar (URL)
+          <input name="avatar" value={formData.avatar} onChange={handleChange} />
+        </label>
       </fieldset>
 
       <fieldset>
-        <legend>Informations sportives</legend>
-
-        <div>
-          <label htmlFor="position">Poste</label>
+        <legend>Sport</legend>
+        <label>
+          Équipe *
           <select
-            id="position"
-            name="position"
-            value={formData.position}
+            name="teamId"
+            value={formData.teamId}
             onChange={handleChange}
+            required
           >
-            <option value="">-- Sélectionner --</option>
-            {POSITIONS.map((pos) => (
-              <option key={pos} value={pos}>{pos}</option>
+            <option value="">—</option>
+            {teams.map((t) => (
+              <option key={t.id} value={t.id}>
+                {t.name}
+              </option>
             ))}
           </select>
-        </div>
-
-        <div>
-          <label htmlFor="status">Statut</label>
-          <select
-            id="status"
-            name="status"
-            value={formData.status}
-            onChange={handleChange}
-          >
-            <option value="">-- Sélectionner --</option>
+        </label>
+        <label>
+          Poste
+          <select name="position" value={formData.position} onChange={handleChange}>
+            <option value="">—</option>
+            {POSITIONS.map((p) => (
+              <option key={p.value} value={p.value}>
+                {p.label}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label>
+          Statut
+          <select name="status" value={formData.status} onChange={handleChange}>
+            <option value="">—</option>
             {STATUSES.map((s) => (
-              <option key={s} value={s}>{s}</option>
+              <option key={s.value} value={s.value}>
+                {s.label}
+              </option>
             ))}
           </select>
-        </div>
-
-        <div>
-          <label htmlFor="rating">Note</label>
+        </label>
+        <label>
+          Note
           <input
-            id="rating"
             type="number"
             name="rating"
-            min="0"
-            max="100"
+            min={0}
+            max={100}
             value={formData.rating}
             onChange={handleChange}
           />
-        </div>
+        </label>
       </fieldset>
 
       <fieldset>
-        <legend>Contact d'urgence</legend>
-
-        <div>
-          <label htmlFor="emergency_name">Nom</label>
+        <legend>Urgence</legend>
+        <label>
+          Nom contact
           <input
-            id="emergency_name"
-            type="text"
-            name="emergency_name"
-            value={formData.emergency_name}
+            name="emergencyName"
+            value={formData.emergencyName}
             onChange={handleChange}
           />
-        </div>
-
-        <div>
-          <label htmlFor="emergency_email">Email</label>
+        </label>
+        <label>
+          Email contact
           <input
-            id="emergency_email"
             type="email"
-            name="emergency_email"
-            value={formData.emergency_email}
+            name="emergencyEmail"
+            value={formData.emergencyEmail}
             onChange={handleChange}
           />
-        </div>
-
-        <div>
-          <label htmlFor="emergency_phone_number">Téléphone</label>
+        </label>
+        <label>
+          Téléphone contact
           <input
-            id="emergency_phone_number"
             type="tel"
-            name="emergency_phone_number"
-            value={formData.emergency_phone_number}
+            name="emergencyPhoneNumber"
+            value={formData.emergencyPhoneNumber}
             onChange={handleChange}
           />
-        </div>
+        </label>
       </fieldset>
 
-      <button type="submit">Enregistrer</button>
+      {serverErrors?.length ? (
+        <p className="form-server-error" role="alert">
+          {fieldError(serverErrors, 'firstname') ||
+            serverErrors.map((x) => x.message).join(' ')}
+        </p>
+      ) : null}
+
+      <div className="crud-form__actions">
+        <button type="submit" disabled={isSubmitting}>
+          {isSubmitting ? 'Enregistrement…' : 'Enregistrer'}
+        </button>
+      </div>
     </form>
   );
-};
-
-export default PlayerForm;
+}

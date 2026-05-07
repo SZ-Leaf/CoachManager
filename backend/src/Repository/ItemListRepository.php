@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\ItemList;
+use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -16,28 +17,31 @@ class ItemListRepository extends ServiceEntityRepository
         parent::__construct($registry, ItemList::class);
     }
 
-    //    /**
-    //     * @return ItemList[] Returns an array of ItemList objects
-    //     */
-    //    public function findByExampleField($value): array
-    //    {
-    //        return $this->createQueryBuilder('i')
-    //            ->andWhere('i.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->orderBy('i.id', 'ASC')
-    //            ->setMaxResults(10)
-    //            ->getQuery()
-    //            ->getResult()
-    //        ;
-    //    }
+    /**
+     * @return list<ItemList>
+     */
+    public function findAllForCoach(User $coach): array
+    {
+        return $this->createQueryBuilder('il')
+            ->innerJoin('il.inventory', 'inv')
+            ->innerJoin('inv.team', 'team')
+            ->andWhere('team.coach = :coach')
+            ->setParameter('coach', $coach)
+            ->orderBy('il.id', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
 
-    //    public function findOneBySomeField($value): ?ItemList
-    //    {
-    //        return $this->createQueryBuilder('i')
-    //            ->andWhere('i.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->getQuery()
-    //            ->getOneOrNullResult()
-    //        ;
-    //    }
+    public function findOneByIdForCoach(int $id, User $coach): ?ItemList
+    {
+        return $this->createQueryBuilder('il')
+            ->innerJoin('il.inventory', 'inv')
+            ->innerJoin('inv.team', 'team')
+            ->andWhere('il.id = :id')
+            ->andWhere('team.coach = :coach')
+            ->setParameter('id', $id)
+            ->setParameter('coach', $coach)
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
 }

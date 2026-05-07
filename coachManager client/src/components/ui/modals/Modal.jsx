@@ -21,10 +21,21 @@ const Modal = ({ isOpen, onClose, title, children }) => {
 
   return (
     <div className="modal-overlay" onClick={onClose}>
-      <div className="modal" onClick={(e) => e.stopPropagation()}>
+      <div
+        className="modal"
+        role="dialog"
+        aria-modal="true"
+        aria-label={title || 'Fenêtre de dialogue'}
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="modal-header">
           {title && <h2 className="modal-title">{title}</h2>}
-          <button className="modal-close" onClick={onClose} aria-label="Fermer">
+          <button
+            type="button"
+            className="modal-close"
+            onClick={onClose}
+            aria-label="Fermer"
+          >
             ✕
           </button>
         </div>

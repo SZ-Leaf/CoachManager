@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\Inventory;
+use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -16,28 +17,29 @@ class InventoryRepository extends ServiceEntityRepository
         parent::__construct($registry, Inventory::class);
     }
 
-    //    /**
-    //     * @return Inventory[] Returns an array of Inventory objects
-    //     */
-    //    public function findByExampleField($value): array
-    //    {
-    //        return $this->createQueryBuilder('i')
-    //            ->andWhere('i.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->orderBy('i.id', 'ASC')
-    //            ->setMaxResults(10)
-    //            ->getQuery()
-    //            ->getResult()
-    //        ;
-    //    }
+    /**
+     * @return list<Inventory>
+     */
+    public function findAllForCoach(User $coach): array
+    {
+        return $this->createQueryBuilder('inv')
+            ->innerJoin('inv.team', 'team')
+            ->andWhere('team.coach = :coach')
+            ->setParameter('coach', $coach)
+            ->orderBy('inv.id', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
 
-    //    public function findOneBySomeField($value): ?Inventory
-    //    {
-    //        return $this->createQueryBuilder('i')
-    //            ->andWhere('i.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->getQuery()
-    //            ->getOneOrNullResult()
-    //        ;
-    //    }
+    public function findOneByIdForCoach(int $id, User $coach): ?Inventory
+    {
+        return $this->createQueryBuilder('inv')
+            ->innerJoin('inv.team', 'team')
+            ->andWhere('inv.id = :id')
+            ->andWhere('team.coach = :coach')
+            ->setParameter('id', $id)
+            ->setParameter('coach', $coach)
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
 }

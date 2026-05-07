@@ -1,1 +1,1 @@
-// index utils
+export { ROUTES } from './routes.js';

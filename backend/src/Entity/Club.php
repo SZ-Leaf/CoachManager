@@ -28,6 +28,10 @@ class Club
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $description = null;
 
+    #[ORM\ManyToOne(targetEntity: User::class)]
+    #[ORM\JoinColumn(name: 'coach_id', referencedColumnName: 'id', onDelete: 'SET NULL')]
+    private ?User $coach = null;
+
     #[ORM\Column]
     private ?\DateTimeImmutable $createdAt = null;
 
@@ -91,6 +95,18 @@ class Club
     public function setDescription(?string $description): static
     {
         $this->description = $description;
+
+        return $this;
+    }
+
+    public function getCoach(): ?User
+    {
+        return $this->coach;
+    }
+
+    public function setCoach(?User $coach): static
+    {
+        $this->coach = $coach;
 
         return $this;
     }

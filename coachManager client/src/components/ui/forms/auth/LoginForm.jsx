@@ -1,23 +1,46 @@
 import { useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+
+import { useAuth } from '../../../../context/AuthContext.jsx';
+import { ROUTES } from '../../../../utils/routes.js';
+import Alert from '../../feedback/Alert.jsx';
 
 const LoginForm = () => {
-  const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-  });
+  const { login } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [formData, setFormData] = useState({ email: '', password: '' });
+  const [error, setError] = useState('');
+  const [pending, setPending] = useState(false);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log(formData);
+    setError('');
+    setPending(true);
+    try {
+      await login(formData);
+      const dest = location.state?.from?.pathname || ROUTES.DASHBOARD;
+      navigate(dest, { replace: true });
+    } catch (err) {
+      setError(err.message || 'Connexion impossible');
+    } finally {
+      setPending(false);
+    }
   };
 
   return (
     <form className="login-form" onSubmit={handleSubmit}>
       <h2>Connexion</h2>
+
+      {error ? (
+        <Alert variant="error" title="Erreur">
+          {error}
+        </Alert>
+      ) : null}
 
       <div>
         <label htmlFor="email">Email</label>
@@ -27,6 +50,7 @@ const LoginForm = () => {
           name="email"
           value={formData.email}
           onChange={handleChange}
+          autoComplete="email"
           required
         />
       </div>
@@ -39,11 +63,14 @@ const LoginForm = () => {
           name="password"
           value={formData.password}
           onChange={handleChange}
+          autoComplete="current-password"
           required
         />
       </div>
 
-      <button type="submit">Se connecter</button>
+      <button type="submit" disabled={pending}>
+        {pending ? 'Connexion…' : 'Se connecter'}
+      </button>
     </form>
   );
 };

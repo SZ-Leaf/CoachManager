@@ -1,9 +1,11 @@
+import { ROUTES } from '../../utils/routes.js';
+
 export const LAYOUT_NAV_LINKS = [
-  { to: '/tableau-de-bord', label: 'Tableau de bord' },
-  { to: '/club', label: 'Club' },
-  { to: '/equipes', label: 'Équipes' },
-  { to: '/joueurs', label: 'Joueurs' },
-  { to: '/presences', label: 'Présences' },
-  { to: '/inventaire', label: 'Inventaire' },
-  { to: '/messages', label: 'Messages' },
+  { to: ROUTES.DASHBOARD, label: 'Tableau de bord' },
+  { to: ROUTES.CLUB, label: 'Club' },
+  { to: ROUTES.TEAMS, label: 'Équipes' },
+  { to: ROUTES.PLAYERS, label: 'Joueurs' },
+  { to: ROUTES.ATTENDANCE, label: 'Présences' },
+  { to: ROUTES.INVENTORY, label: 'Inventaire' },
+  { to: ROUTES.MESSAGES, label: 'Messages' },
 ];

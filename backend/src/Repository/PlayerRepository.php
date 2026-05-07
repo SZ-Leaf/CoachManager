@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\Player;
+use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -16,26 +17,30 @@ class PlayerRepository extends ServiceEntityRepository
         parent::__construct($registry, Player::class);
     }
 
-    public function findAllPlayers()
+    /**
+     * @return Player[]
+     */
+    public function findAllByCoach(User $coach): array
     {
-        $query = $this->createQueryBuilder('player')
-            ->select('player')
+        return $this->createQueryBuilder('player')
+            ->innerJoin('player.team', 'team')
+            ->andWhere('team.coach = :coach')
+            ->setParameter('coach', $coach)
+            ->orderBy('player.id', 'ASC')
             ->getQuery()
             ->getResult();
-
-            return $query;
     }
 
-    public function findOnePlayerById(int $id): ?Player
+    public function findOneByIdAndCoach(int $id, User $coach): ?Player
     {
-        $query = $this->createQueryBuilder('player')
-            ->select('player')
-            ->where('player.id = :id')
+        return $this->createQueryBuilder('player')
+            ->innerJoin('player.team', 'team')
+            ->andWhere('player.id = :id')
+            ->andWhere('team.coach = :coach')
             ->setParameter('id', $id)
+            ->setParameter('coach', $coach)
             ->getQuery()
             ->getOneOrNullResult();
-
-        return $query;
     }
 
     //    /**

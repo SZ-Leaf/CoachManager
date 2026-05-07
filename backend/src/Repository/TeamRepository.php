@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\Team;
+use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -16,28 +17,27 @@ class TeamRepository extends ServiceEntityRepository
         parent::__construct($registry, Team::class);
     }
 
-    //    /**
-    //     * @return Team[] Returns an array of Team objects
-    //     */
-    //    public function findByExampleField($value): array
-    //    {
-    //        return $this->createQueryBuilder('t')
-    //            ->andWhere('t.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->orderBy('t.id', 'ASC')
-    //            ->setMaxResults(10)
-    //            ->getQuery()
-    //            ->getResult()
-    //        ;
-    //    }
+    /**
+     * @return Team[]
+     */
+    public function findAllByCoach(User $coach): array
+    {
+        return $this->createQueryBuilder('team')
+            ->andWhere('team.coach = :coach')
+            ->setParameter('coach', $coach)
+            ->orderBy('team.id', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
 
-    //    public function findOneBySomeField($value): ?Team
-    //    {
-    //        return $this->createQueryBuilder('t')
-    //            ->andWhere('t.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->getQuery()
-    //            ->getOneOrNullResult()
-    //        ;
-    //    }
+    public function findOneByIdAndCoach(int $id, User $coach): ?Team
+    {
+        return $this->createQueryBuilder('team')
+            ->andWhere('team.id = :id')
+            ->andWhere('team.coach = :coach')
+            ->setParameter('id', $id)
+            ->setParameter('coach', $coach)
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
 }

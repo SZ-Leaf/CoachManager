@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\ItemListRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: ItemListRepository::class)]
@@ -17,9 +19,17 @@ class ItemList
     #[ORM\Column(length: 255)]
     private ?string $name = null;
 
-    #[ORM\ManyToOne(targetEntity: Product::class)]
-    #[ORM\JoinColumn(name: 'product_id', referencedColumnName: 'id')]
-    private ?Product $product = null;
+    #[ORM\ManyToOne(targetEntity: Inventory::class, inversedBy: 'itemLists')]
+    #[ORM\JoinColumn(name: 'inventory_id', referencedColumnName: 'id', nullable: true)]
+    private ?Inventory $inventory = null;
+
+    #[ORM\OneToMany(targetEntity: Product::class, mappedBy: 'itemList')]
+    private Collection $products;
+
+    public function __construct()
+    {
+        $this->products = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -38,14 +48,43 @@ class ItemList
         return $this;
     }
 
-    public function getProduct(): ?Product
+    public function getInventory(): ?Inventory
     {
-        return $this->product;
+        return $this->inventory;
     }
 
-    public function setProduct(?Product $product): static
+    public function setInventory(?Inventory $inventory): static
     {
-        $this->product = $product;
+        $this->inventory = $inventory;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Product>
+     */
+    public function getProducts(): Collection
+    {
+        return $this->products;
+    }
+
+    public function addProduct(Product $product): static
+    {
+        if (!$this->products->contains($product)) {
+            $this->products->add($product);
+            $product->setItemList($this);
+        }
+
+        return $this;
+    }
+
+    public function removeProduct(Product $product): static
+    {
+        if ($this->products->removeElement($product)) {
+            if ($product->getItemList() === $this) {
+                $product->setItemList(null);
+            }
+        }
 
         return $this;
     }

@@ -19,6 +19,10 @@ class Product
     #[ORM\Column]
     private ?int $quantity = null;
 
+    #[ORM\ManyToOne(targetEntity: ItemList::class, inversedBy: 'products')]
+    #[ORM\JoinColumn(name: 'item_list_id', referencedColumnName: 'id', nullable: true)]
+    private ?ItemList $itemList = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -44,6 +48,18 @@ class Product
     public function setQuantity(int $quantity): static
     {
         $this->quantity = $quantity;
+
+        return $this;
+    }
+
+    public function getItemList(): ?ItemList
+    {
+        return $this->itemList;
+    }
+
+    public function setItemList(?ItemList $itemList): static
+    {
+        $this->itemList = $itemList;
 
         return $this;
     }

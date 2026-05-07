@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\Club;
+use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -16,28 +17,27 @@ class ClubRepository extends ServiceEntityRepository
         parent::__construct($registry, Club::class);
     }
 
-    //    /**
-    //     * @return Club[] Returns an array of Club objects
-    //     */
-    //    public function findByExampleField($value): array
-    //    {
-    //        return $this->createQueryBuilder('c')
-    //            ->andWhere('c.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->orderBy('c.id', 'ASC')
-    //            ->setMaxResults(10)
-    //            ->getQuery()
-    //            ->getResult()
-    //        ;
-    //    }
+    /**
+     * @return list<Club>
+     */
+    public function findAllForCoach(User $coach): array
+    {
+        return $this->createQueryBuilder('club')
+            ->andWhere('club.coach = :coach')
+            ->setParameter('coach', $coach)
+            ->orderBy('club.name', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
 
-    //    public function findOneBySomeField($value): ?Club
-    //    {
-    //        return $this->createQueryBuilder('c')
-    //            ->andWhere('c.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->getQuery()
-    //            ->getOneOrNullResult()
-    //        ;
-    //    }
+    public function findOneByIdForCoach(int $id, User $coach): ?Club
+    {
+        return $this->createQueryBuilder('club')
+            ->andWhere('club.id = :id')
+            ->andWhere('club.coach = :coach')
+            ->setParameter('id', $id)
+            ->setParameter('coach', $coach)
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
 }

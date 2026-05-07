@@ -24,9 +24,9 @@ class Team
     #[ORM\Column(type: 'date_immutable', nullable: true)]
     private ?\DateTimeImmutable $season = null;
 
-    #[ORM\ManyToOne(targetEntity: Inventory::class)]
-    #[ORM\JoinColumn(name: 'inventory_id', referencedColumnName: 'id')]
-    private ?Inventory $inventory = null;
+    #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'teams')]
+    #[ORM\JoinColumn(name: 'coach_id', referencedColumnName: 'id', nullable: true)]
+    private ?User $coach = null;
 
     #[ORM\ManyToOne(targetEntity: Club::class, inversedBy: 'teams')]
     #[ORM\JoinColumn(name: 'club_id', referencedColumnName: 'id')]
@@ -40,6 +40,9 @@ class Team
 
     #[ORM\OneToMany(targetEntity: Player::class, mappedBy: 'team')]
     private Collection $players;
+
+    #[ORM\OneToOne(mappedBy: 'team', targetEntity: Inventory::class)]
+    private ?Inventory $inventory = null;
 
     public function __construct()
     {
@@ -87,14 +90,14 @@ class Team
         return $this;
     }
 
-    public function getInventory(): ?Inventory
+    public function getCoach(): ?User
     {
-        return $this->inventory;
+        return $this->coach;
     }
 
-    public function setInventory(?Inventory $inventory): static
+    public function setCoach(?User $coach): static
     {
-        $this->inventory = $inventory;
+        $this->coach = $coach;
 
         return $this;
     }
@@ -160,6 +163,26 @@ class Team
                 $player->setTeam(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getInventory(): ?Inventory
+    {
+        return $this->inventory;
+    }
+
+    public function setInventory(?Inventory $inventory): static
+    {
+        if ($inventory === null && $this->inventory !== null) {
+            $this->inventory->setTeam(null);
+        }
+
+        if ($inventory !== null && $inventory->getTeam() !== $this) {
+            $inventory->setTeam($this);
+        }
+
+        $this->inventory = $inventory;
 
         return $this;
     }

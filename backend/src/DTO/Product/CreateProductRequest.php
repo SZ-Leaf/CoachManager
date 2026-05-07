@@ -13,4 +13,8 @@ class CreateProductRequest
     #[Assert\NotNull]
     #[Assert\PositiveOrZero]
     public ?int $quantity = null;
+
+    #[Assert\NotNull]
+    #[Assert\Positive]
+    public ?int $itemListId = null;
 }

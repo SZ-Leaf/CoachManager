@@ -1,1 +1,1 @@
-// index hooks
+export { useAuth } from '../context/AuthContext.jsx';

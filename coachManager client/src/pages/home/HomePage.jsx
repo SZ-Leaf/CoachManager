@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import Header from '../../components/layout/Header.jsx';
+import { ROUTES } from '../../utils/routes.js';
 import '../../components/layout/layout.css';
 import './home.css';
 
@@ -17,7 +18,7 @@ const HomePage = () => {
             coachs exigeants.
           </p>
           <div className="hero-cta">
-            <Link to="/register" className="cta-primary">
+            <Link to={ROUTES.REGISTER} className="cta-primary">
               Commencer maintenant
             </Link>
           </div>

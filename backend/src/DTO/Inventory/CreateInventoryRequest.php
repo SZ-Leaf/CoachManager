@@ -8,5 +8,5 @@ class CreateInventoryRequest
 {
     #[Assert\NotNull]
     #[Assert\Positive]
-    public ?int $listId = null;
+    public ?int $teamId = null;
 }

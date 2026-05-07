@@ -4,22 +4,43 @@ namespace App\Services\Player;
 
 use App\DTO\Player\CreatePlayerRequest;
 use App\Entity\Player;
+use App\Entity\User;
 use App\Enum\PlayerPosition;
 use App\Enum\PlayerStatus;
+use App\Exceptions\Player\CreatePlayerException;
 use App\Repository\TeamRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 class CreatePlayerService
 {
     public function __construct(
-        private EntityManagerInterface $em,
-        private TeamRepository $teamRepository
-    ) {}
+        private readonly EntityManagerInterface $em,
+        private readonly TeamRepository $teamRepository,
+        private readonly ValidatorInterface $validator,
+    ) {
+    }
 
-    public function create(CreatePlayerRequest $dto): array
+    /**
+     * @throws CreatePlayerException
+     */
+    public function create(User $coach, CreatePlayerRequest $dto): array
     {
-        if (empty($dto->firstname) || empty($dto->lastname)) {
-            throw new \InvalidArgumentException('Firstname and lastname are required');
+        $violations = $this->validator->validate($dto);
+        if (count($violations) > 0) {
+            $errors = [];
+            foreach ($violations as $v) {
+                $errors[] = sprintf('%s: %s', $v->getPropertyPath(), $v->getMessage());
+            }
+            throw CreatePlayerException::validationFailed(implode('; ', $errors));
+        }
+
+        $team = $this->teamRepository->find($dto->teamId);
+        if ($team === null) {
+            throw CreatePlayerException::teamNotFound();
+        }
+        if ($team->getCoach()?->getId() !== $coach->getId()) {
+            throw CreatePlayerException::teamForbidden();
         }
 
         $player = new Player();
@@ -34,33 +55,40 @@ class CreatePlayerService
         $player->setRating($dto->rating);
 
         if ($dto->birthday !== null) {
-            $player->setBirthday(new \DateTimeImmutable($dto->birthday));
+            try {
+                $player->setBirthday(new \DateTimeImmutable($dto->birthday));
+            } catch (\Throwable) {
+                throw CreatePlayerException::invalidBirthday();
+            }
         }
 
         if ($dto->position !== null) {
-            $player->setPosition(PlayerPosition::from($dto->position));
+            try {
+                $player->setPosition(PlayerPosition::from($dto->position));
+            } catch (\ValueError) {
+                throw CreatePlayerException::invalidPosition();
+            }
         }
 
         if ($dto->status !== null) {
-            $player->setStatus(PlayerStatus::from($dto->status));
-        }
-
-        if ($dto->teamId !== null) {
-            $team = $this->teamRepository->find($dto->teamId);
-
-            if (!$team) {
-                throw new \InvalidArgumentException('Team not found');
+            try {
+                $player->setStatus(PlayerStatus::from($dto->status));
+            } catch (\ValueError) {
+                throw CreatePlayerException::invalidStatus();
             }
-
-            $player->setTeam($team);
         }
+        $player->setTeam($team);
+        $player->setCreatedAt(new \DateTimeImmutable());
+        $player->setUpdatedAt(new \DateTimeImmutable());
 
         $this->em->persist($player);
         $this->em->flush();
 
         return [
-            'message' => 'Player created',
             'id' => $player->getId(),
+            'firstname' => $player->getFirstname(),
+            'lastname' => $player->getLastname(),
+            'teamId' => $player->getTeam()?->getId(),
         ];
     }
 }

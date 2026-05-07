@@ -3,21 +3,44 @@
 namespace App\Services\Player;
 
 use App\DTO\Player\UpdatePlayerRequest;
-use App\Entity\Player;
+use App\Entity\User;
 use App\Enum\PlayerPosition;
 use App\Enum\PlayerStatus;
+use App\Exceptions\Player\UpdatePlayerException;
+use App\Repository\PlayerRepository;
 use App\Repository\TeamRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 class UpdatePlayerService
 {
     public function __construct(
-        private EntityManagerInterface $em,
-        private TeamRepository $teamRepository
-    ) {}
+        private readonly EntityManagerInterface $em,
+        private readonly TeamRepository $teamRepository,
+        private readonly PlayerRepository $playerRepository,
+        private readonly ValidatorInterface $validator,
+    ) {
+    }
 
-    public function update(Player $player, UpdatePlayerRequest $dto): array
+    /**
+     * @throws UpdatePlayerException
+     */
+    public function update(User $coach, int $id, UpdatePlayerRequest $dto): array
     {
+        $violations = $this->validator->validate($dto);
+        if (count($violations) > 0) {
+            $errors = [];
+            foreach ($violations as $v) {
+                $errors[] = sprintf('%s: %s', $v->getPropertyPath(), $v->getMessage());
+            }
+            throw UpdatePlayerException::validationFailed(implode('; ', $errors));
+        }
+
+        $player = $this->playerRepository->findOneByIdAndCoach($id, $coach);
+        if ($player === null) {
+            throw UpdatePlayerException::notFound();
+        }
+
         if ($dto->firstname !== null) {
             $player->setFirstname($dto->firstname);
         }
@@ -47,7 +70,11 @@ class UpdatePlayerService
         }
 
         if ($dto->birthday !== null) {
-            $player->setBirthday(new \DateTimeImmutable($dto->birthday));
+            try {
+                $player->setBirthday(new \DateTimeImmutable($dto->birthday));
+            } catch (\Throwable) {
+                throw UpdatePlayerException::invalidBirthday();
+            }
         }
 
         if ($dto->avatar !== null) {
@@ -55,11 +82,19 @@ class UpdatePlayerService
         }
 
         if ($dto->position !== null) {
-            $player->setPosition(PlayerPosition::from($dto->position));
+            try {
+                $player->setPosition(PlayerPosition::from($dto->position));
+            } catch (\ValueError) {
+                throw UpdatePlayerException::invalidPosition();
+            }
         }
 
         if ($dto->status !== null) {
-            $player->setStatus(PlayerStatus::from($dto->status));
+            try {
+                $player->setStatus(PlayerStatus::from($dto->status));
+            } catch (\ValueError) {
+                throw UpdatePlayerException::invalidStatus();
+            }
         }
 
         if ($dto->rating !== null) {
@@ -69,8 +104,11 @@ class UpdatePlayerService
         if ($dto->teamId !== null) {
             $team = $this->teamRepository->find($dto->teamId);
 
-            if (!$team) {
-                throw new \InvalidArgumentException('Team not found');
+            if ($team === null) {
+                throw UpdatePlayerException::teamNotFound();
+            }
+            if ($team->getCoach()?->getId() !== $coach->getId()) {
+                throw UpdatePlayerException::teamForbidden();
             }
 
             $player->setTeam($team);
@@ -81,8 +119,10 @@ class UpdatePlayerService
         $this->em->flush();
 
         return [
-            'message' => 'Player updated',
             'id' => $player->getId(),
+            'firstname' => $player->getFirstname(),
+            'lastname' => $player->getLastname(),
+            'teamId' => $player->getTeam()?->getId(),
         ];
     }
 }

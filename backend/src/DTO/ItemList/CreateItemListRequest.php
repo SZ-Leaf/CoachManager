@@ -10,6 +10,7 @@ class CreateItemListRequest
     #[Assert\Length(max: 255)]
     public string $name = '';
 
+    #[Assert\NotNull]
     #[Assert\Positive]
-    public ?int $productId = null;
+    public ?int $inventoryId = null;
 }

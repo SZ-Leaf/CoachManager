@@ -22,10 +22,10 @@ security:
                 check_path: api_auth_login
                 username_path: email
                 password_path: password
+                success_handler: App\Security\JsonAuthenticationSuccessHandler
+                failure_handler: App\Security\JsonAuthenticationFailureHandler
             logout:
                 path: api_auth_logout
-                # where to redirect after logout
-                # target: app_any_route
 
             # Activate different ways to authenticate:
             # https://symfony.com/doc/current/security.html#the-firewall
@@ -35,8 +35,12 @@ security:
 
     # Note: Only the *first* matching rule is applied
     access_control:
-        # - { path: ^/admin, roles: ROLE_ADMIN }
-        # - { path: ^/profile, roles: ROLE_USER }
+        - { path: ^/api/auth/register$, roles: PUBLIC_ACCESS, methods: [POST] }
+        - { path: ^/api/auth/login$, roles: PUBLIC_ACCESS, methods: [POST] }
+        - { path: ^/api/auth/logout$, roles: IS_AUTHENTICATED_FULLY, methods: [POST] }
+        # CORS preflight must not hit authenticated ^/api (browser sends OPTIONS without cookies).
+        - { path: ^/api, roles: PUBLIC_ACCESS, methods: [OPTIONS] }
+        - { path: ^/api, roles: IS_AUTHENTICATED_FULLY }
 
 when@test:
     security:

@@ -59,9 +59,11 @@ class RegisterUserService
       $this->em->flush();
 
       return [
+         'id' => $user->getId(),
          'email' => $user->getEmail(),
          'firstname' => $user->getFirstname(),
          'lastname' => $user->getLastname(),
+         'avatar' => $user->getAvatar(),
       ];
    }
 }

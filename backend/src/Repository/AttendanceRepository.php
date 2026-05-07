@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\Attendance;
+use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -16,28 +17,32 @@ class AttendanceRepository extends ServiceEntityRepository
         parent::__construct($registry, Attendance::class);
     }
 
-    //    /**
-    //     * @return Attendance[] Returns an array of Attendance objects
-    //     */
-    //    public function findByExampleField($value): array
-    //    {
-    //        return $this->createQueryBuilder('a')
-    //            ->andWhere('a.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->orderBy('a.id', 'ASC')
-    //            ->setMaxResults(10)
-    //            ->getQuery()
-    //            ->getResult()
-    //        ;
-    //    }
+    /**
+     * @return list<Attendance>
+     */
+    public function findAllForCoach(User $coach): array
+    {
+        return $this->createQueryBuilder('a')
+            ->innerJoin('a.player', 'pl')
+            ->innerJoin('pl.team', 'team')
+            ->andWhere('team.coach = :coach')
+            ->setParameter('coach', $coach)
+            ->orderBy('a.date', 'DESC')
+            ->addOrderBy('a.id', 'DESC')
+            ->getQuery()
+            ->getResult();
+    }
 
-    //    public function findOneBySomeField($value): ?Attendance
-    //    {
-    //        return $this->createQueryBuilder('a')
-    //            ->andWhere('a.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->getQuery()
-    //            ->getOneOrNullResult()
-    //        ;
-    //    }
+    public function findOneByIdForCoach(int $id, User $coach): ?Attendance
+    {
+        return $this->createQueryBuilder('a')
+            ->innerJoin('a.player', 'pl')
+            ->innerJoin('pl.team', 'team')
+            ->andWhere('a.id = :id')
+            ->andWhere('team.coach = :coach')
+            ->setParameter('id', $id)
+            ->setParameter('coach', $coach)
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
 }

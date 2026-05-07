@@ -8,9 +8,12 @@ class UpdateProductRequest
 {
     #[Assert\NotBlank]
     #[Assert\Length(max: 255)]
-    public string $name;
+    public string $name = '';
 
     #[Assert\NotNull]
     #[Assert\PositiveOrZero]
     public ?int $quantity = null;
+
+    #[Assert\Positive]
+    public ?int $itemListId = null;
 }

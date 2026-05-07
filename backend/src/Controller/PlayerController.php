@@ -4,54 +4,75 @@ namespace App\Controller;
 
 use App\DTO\Player\CreatePlayerRequest;
 use App\DTO\Player\UpdatePlayerRequest;
-use App\Entity\Player;
-use App\Repository\PlayerRepository;
+use App\Entity\User;
+use App\Exceptions\Player\CreatePlayerException;
+use App\Exceptions\Player\DeletePlayerException;
+use App\Exceptions\Player\GetPlayerException;
+use App\Exceptions\Player\UpdatePlayerException;
 use App\Services\Player\CreatePlayerService;
 use App\Services\Player\DeletePlayerService;
+use App\Services\Player\GetPlayerService;
+use App\Services\Player\ListPlayersService;
 use App\Services\Player\UpdatePlayerService;
-use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\CurrentUser;
 
-#[Route('api/player')]
+#[Route('/api/players', name: 'api_players_')]
 final class PlayerController extends AbstractController
 {
-    #[Route('/', name: 'players', methods:['GET'])]
-    public function index(PlayerRepository $playerRepository): JsonResponse
+    #[Route('', name: 'list', methods: ['GET'])]
+    public function list(#[CurrentUser] ?User $user, ListPlayersService $listPlayersService): JsonResponse
     {
-        $players = $playerRepository->findAllPlayers();
-        // dd($players);
-        return $this->json([
-            'players' => $players
-        ]);
-    }
-
-    #[Route('/{id}', name: 'player', methods:['GET'])]
-    public function show(PlayerRepository $playerRepository,int $id): JsonResponse
-    {
-        $player = $playerRepository->findOnePlayerById($id);
-        // dd('je récupère bien un player');
-
-        if (!$player) {
-            return $this->json([
-                'message' => 'Player not found',
-            ], Response::HTTP_NOT_FOUND);
+        if ($user === null) {
+            return $this->json(['message' => 'Unauthenticated'], Response::HTTP_UNAUTHORIZED);
         }
 
+        $players = $listPlayersService->list($user);
+
         return $this->json([
-            'player' => $player
-        ]);
+            'items' => $players,
+        ], Response::HTTP_OK);
     }
 
-    #[Route('/new', name: 'player_new', methods:['POST'])]
-    public function new(Request $request, CreatePlayerService $createPlayerService): JsonResponse
-    {
-       try {
-            $payload = $request->toArray();
+    #[Route('/{id}', name: 'get', methods: ['GET'], requirements: ['id' => '\d+'])]
+    public function get(
+        int $id,
+        #[CurrentUser] ?User $user,
+        GetPlayerService $getPlayerService
+    ): JsonResponse {
+        if ($user === null) {
+            return $this->json(['message' => 'Unauthenticated'], Response::HTTP_UNAUTHORIZED);
+        }
 
+        try {
+            $player = $getPlayerService->get($user, $id);
+
+            return $this->json([
+                'player' => $player,
+            ], Response::HTTP_OK);
+        } catch (GetPlayerException $e) {
+            return $this->json([
+                'message' => $e->getMessage(),
+            ], Response::HTTP_NOT_FOUND);
+        }
+    }
+
+    #[Route('', name: 'create', methods: ['POST'])]
+    public function create(
+        Request $request,
+        #[CurrentUser] ?User $user,
+        CreatePlayerService $createPlayerService
+    ): JsonResponse {
+        if ($user === null) {
+            return $this->json(['message' => 'Unauthenticated'], Response::HTTP_UNAUTHORIZED);
+        }
+
+        try {
+            $payload = $request->toArray();
             $dto = new CreatePlayerRequest();
             $dto->firstname = $payload['firstname'] ?? '';
             $dto->lastname = $payload['lastname'] ?? '';
@@ -64,25 +85,40 @@ final class PlayerController extends AbstractController
             $dto->avatar = $payload['avatar'] ?? null;
             $dto->position = $payload['position'] ?? null;
             $dto->status = $payload['status'] ?? null;
-            $dto->rating = $payload['rating'] ?? null;
-            $dto->teamId = $payload['teamId'] ?? null;
+            $dto->rating = isset($payload['rating']) && is_numeric($payload['rating']) ? (int) $payload['rating'] : null;
+            $dto->teamId = isset($payload['teamId']) && is_numeric($payload['teamId']) ? (int) $payload['teamId'] : null;
 
-            $result = $createPlayerService->create($dto);
+            $player = $createPlayerService->create($user, $dto);
 
-            return $this->json($result, Response::HTTP_CREATED);
-        } catch (\Throwable $e) {
+            return $this->json([
+                'player' => $player,
+            ], Response::HTTP_CREATED);
+        } catch (CreatePlayerException $e) {
+            $status = match ($e->getCode()) {
+                CreatePlayerException::TEAM_NOT_FOUND => Response::HTTP_NOT_FOUND,
+                CreatePlayerException::TEAM_FORBIDDEN => Response::HTTP_FORBIDDEN,
+                default => Response::HTTP_BAD_REQUEST,
+            };
+
             return $this->json([
                 'message' => $e->getMessage(),
-            ], Response::HTTP_BAD_REQUEST);
+            ], $status);
         }
     }
 
-    #[Route('/edit/{id}', name: 'player_edit', methods:['POST'], requirements: ['id' => '\d+'])]
-    public function edit(Request $request, Player $player, EntityManagerInterface $em, UpdatePlayerService $updatePlayerService)
-    {
+    #[Route('/{id}', name: 'update', methods: ['PATCH'], requirements: ['id' => '\d+'])]
+    public function update(
+        int $id,
+        Request $request,
+        #[CurrentUser] ?User $user,
+        UpdatePlayerService $updatePlayerService
+    ): JsonResponse {
+        if ($user === null) {
+            return $this->json(['message' => 'Unauthenticated'], Response::HTTP_UNAUTHORIZED);
+        }
+
         try {
             $payload = $request->toArray();
-
             $dto = new UpdatePlayerRequest();
             $dto->firstname = $payload['firstname'] ?? null;
             $dto->lastname = $payload['lastname'] ?? null;
@@ -95,24 +131,52 @@ final class PlayerController extends AbstractController
             $dto->avatar = $payload['avatar'] ?? null;
             $dto->position = $payload['position'] ?? null;
             $dto->status = $payload['status'] ?? null;
-            $dto->rating = $payload['rating'] ?? null;
-            $dto->teamId = $payload['teamId'] ?? null;
+            $dto->rating = isset($payload['rating']) && is_numeric($payload['rating']) ? (int) $payload['rating'] : null;
+            $dto->teamId = isset($payload['teamId']) && is_numeric($payload['teamId']) ? (int) $payload['teamId'] : null;
 
-            $result = $updatePlayerService->update($player, $dto);
+            $player = $updatePlayerService->update($user, $id, $dto);
 
-            return $this->json($result);
-        } catch (\Throwable $e) {
+            return $this->json([
+                'player' => $player,
+            ], Response::HTTP_OK);
+        } catch (UpdatePlayerException $e) {
+            $status = match ($e->getCode()) {
+                UpdatePlayerException::NOT_FOUND => Response::HTTP_NOT_FOUND,
+                UpdatePlayerException::TEAM_NOT_FOUND => Response::HTTP_NOT_FOUND,
+                UpdatePlayerException::TEAM_FORBIDDEN => Response::HTTP_FORBIDDEN,
+                default => Response::HTTP_BAD_REQUEST,
+            };
+
             return $this->json([
                 'message' => $e->getMessage(),
-            ], Response::HTTP_BAD_REQUEST);
+            ], $status);
         }
     }
 
-    #[Route('/delete/{id}', name: 'player_delete', methods:['POST'], requirements: ['id' => '\d+'])]
-    public function delete(Player $player, DeletePlayerService $deletePlayerService): JsonResponse
-    {
-        $result = $deletePlayerService->delete($player);
+    #[Route('/{id}', name: 'delete', methods: ['DELETE'], requirements: ['id' => '\d+'])]
+    public function delete(
+        int $id,
+        #[CurrentUser] ?User $user,
+        DeletePlayerService $deletePlayerService
+    ): JsonResponse {
+        if ($user === null) {
+            return $this->json(['message' => 'Unauthenticated'], Response::HTTP_UNAUTHORIZED);
+        }
 
-        return $this->json($result);
+        try {
+            $result = $deletePlayerService->delete($user, $id);
+
+            return $this->json($result, Response::HTTP_OK);
+        } catch (DeletePlayerException $e) {
+            $status = match ($e->getCode()) {
+                DeletePlayerException::NOT_FOUND => Response::HTTP_NOT_FOUND,
+                DeletePlayerException::DELETE_BLOCKED => Response::HTTP_CONFLICT,
+                default => Response::HTTP_BAD_REQUEST,
+            };
+
+            return $this->json([
+                'message' => $e->getMessage(),
+            ], $status);
+        }
     }
 }

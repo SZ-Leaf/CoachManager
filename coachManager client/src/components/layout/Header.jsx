@@ -1,8 +1,12 @@
 import { useState } from 'react';
 import { Link, NavLink } from 'react-router-dom';
+
+import { useAuth } from '../../context/AuthContext.jsx';
+import { ROUTES } from '../../utils/routes.js';
 import { LAYOUT_NAV_LINKS } from './navigation.js';
 
 const Header = ({ onMenuToggle, menuOpen }) => {
+  const { user, logout } = useAuth();
   const hasSidebar = typeof onMenuToggle === 'function';
   const [publicMenuOpen, setPublicMenuOpen] = useState(false);
 
@@ -17,6 +21,10 @@ const Header = ({ onMenuToggle, menuOpen }) => {
 
   const headerClass =
     'layout-header' + (hasSidebar ? '' : ' layout-header--standalone');
+
+  const handleLogout = async () => {
+    await logout();
+  };
 
   return (
     <>
@@ -54,18 +62,40 @@ const Header = ({ onMenuToggle, menuOpen }) => {
 
         <div className="layout-header__actions">
           {hasSidebar ? (
-            <Link to="/login" className="layout-header__account">
-              Mon compte
-            </Link>
+            <>
+              <span className="layout-header__account" style={{ cursor: 'default' }}>
+                {user?.firstname}
+              </span>
+              <button
+                type="button"
+                className="layout-header__account layout-header__account--ghost"
+                onClick={handleLogout}
+              >
+                Déconnexion
+              </button>
+            </>
+          ) : user ? (
+            <>
+              <Link to={ROUTES.DASHBOARD} className="layout-header__account">
+                Espace coach
+              </Link>
+              <button
+                type="button"
+                className="layout-header__account layout-header__account--ghost"
+                onClick={handleLogout}
+              >
+                Déconnexion
+              </button>
+            </>
           ) : (
             <>
               <Link
-                to="/login"
+                to={ROUTES.LOGIN}
                 className="layout-header__account layout-header__account--ghost"
               >
                 Connexion
               </Link>
-              <Link to="/register" className="layout-header__register">
+              <Link to={ROUTES.REGISTER} className="layout-header__register">
                 Essai gratuit
               </Link>
             </>
