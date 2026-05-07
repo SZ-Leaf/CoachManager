@@ -104,8 +104,8 @@ export default function PlayersPage() {
     >
       <div className="players-page crud-page">
         <div className="crud-toolbar">
-          <button type="button" className="btn-primary" onClick={openCreate}>
-            Nouveau joueur
+          <button type="button" className="btn btn-primary" onClick={openCreate}>
+            + Nouveau joueur
           </button>
         </div>
 
@@ -141,12 +141,13 @@ export default function PlayersPage() {
                     <td data-label="Équipe">{p.teamId ?? '—'}</td>
                     <td data-label="Poste">{p.position || '—'}</td>
                     <td data-label="Actions" className="crud-table__actions">
-                      <button type="button" onClick={() => openEdit(p.id)}>
+                      <button type="button" className="btn btn-secondary" style={{ minHeight: '32px', padding: '0 12px', fontSize: '0.8125rem' }} onClick={() => openEdit(p.id)}>
                         Modifier
                       </button>
                       <button
                         type="button"
-                        className="btn-danger"
+                        className="btn btn-danger"
+                        style={{ minHeight: '32px', padding: '0 12px', fontSize: '0.8125rem' }}
                         onClick={() => {
                           if (window.confirm('Supprimer ce joueur ?')) {
                             deleteMutation.mutate(p.id);

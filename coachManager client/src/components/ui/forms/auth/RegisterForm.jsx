@@ -51,9 +51,7 @@ const RegisterForm = () => {
   };
 
   return (
-    <form className="register-form" onSubmit={handleSubmit}>
-      <h2>Inscription</h2>
-
+    <form className="app-form" onSubmit={handleSubmit}>
       {error ? (
         <Alert variant="error" title="Erreur">
           {error}
@@ -109,7 +107,7 @@ const RegisterForm = () => {
           required
           minLength={8}
         />
-        <small className="form-hint">
+        <small style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '4px' }}>
           Au moins 8 caractères, une majuscule et un chiffre.
         </small>
       </div>
@@ -122,10 +120,11 @@ const RegisterForm = () => {
           name="avatar"
           value={formData.avatar}
           onChange={handleChange}
+          placeholder="https://..."
         />
       </div>
 
-      <button type="submit" disabled={pending}>
+      <button type="submit" className="btn btn-primary" disabled={pending}>
         {pending ? 'Envoi…' : "S'inscrire"}
       </button>
     </form>

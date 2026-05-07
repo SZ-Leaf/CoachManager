@@ -86,8 +86,8 @@ export default function TeamsPage() {
     >
       <div className="teams-page crud-page">
         <div className="crud-toolbar">
-          <button type="button" className="btn-primary" onClick={openCreate}>
-            Nouvelle équipe
+          <button type="button" className="btn btn-primary" onClick={openCreate}>
+            + Nouvelle équipe
           </button>
         </div>
 
@@ -123,12 +123,13 @@ export default function TeamsPage() {
                     <td data-label="Saison">{t.season || '—'}</td>
                     <td data-label="Club">{t.clubId ?? '—'}</td>
                     <td data-label="Actions" className="crud-table__actions">
-                      <button type="button" onClick={() => openEdit(t)}>
+                      <button type="button" className="btn btn-secondary" style={{ minHeight: '32px', padding: '0 12px', fontSize: '0.8125rem' }} onClick={() => openEdit(t)}>
                         Modifier
                       </button>
                       <button
                         type="button"
-                        className="btn-danger"
+                        className="btn btn-danger"
+                        style={{ minHeight: '32px', padding: '0 12px', fontSize: '0.8125rem' }}
                         onClick={() => {
                           if (window.confirm('Supprimer cette équipe ?')) {
                             deleteMutation.mutate(t.id);
@@ -152,7 +153,7 @@ export default function TeamsPage() {
         title={editing ? 'Modifier l’équipe' : 'Nouvelle équipe'}
       >
         <form
-          className="crud-form"
+          className="app-form"
           onSubmit={(e) => {
             e.preventDefault();
             saveMutation.mutate();
@@ -161,31 +162,31 @@ export default function TeamsPage() {
           {formError ? (
             <Alert variant="error">{formError}</Alert>
           ) : null}
-          <label>
-            Nom
+          <div>
+            <label>Nom</label>
             <input
               value={form.name}
               onChange={(e) => setForm({ ...form, name: e.target.value })}
               required
             />
-          </label>
-          <label>
-            Catégorie
+          </div>
+          <div>
+            <label>Catégorie</label>
             <input
               value={form.category}
               onChange={(e) => setForm({ ...form, category: e.target.value })}
             />
-          </label>
-          <label>
-            Saison (AAAA-MM-JJ)
+          </div>
+          <div>
+            <label>Saison (AAAA-MM-JJ)</label>
             <input
               type="date"
               value={form.season}
               onChange={(e) => setForm({ ...form, season: e.target.value })}
             />
-          </label>
-          <label>
-            Club
+          </div>
+          <div>
+            <label>Club</label>
             <select
               value={form.clubId}
               onChange={(e) => setForm({ ...form, clubId: e.target.value })}
@@ -197,12 +198,10 @@ export default function TeamsPage() {
                 </option>
               ))}
             </select>
-          </label>
-          <div className="crud-form__actions">
-            <button type="submit" disabled={saveMutation.isPending}>
-              {saveMutation.isPending ? 'Enregistrement…' : 'Enregistrer'}
-            </button>
           </div>
+          <button type="submit" className="btn btn-primary" disabled={saveMutation.isPending}>
+            {saveMutation.isPending ? 'Enregistrement…' : 'Enregistrer'}
+          </button>
         </form>
       </Modal>
     </AppPage>

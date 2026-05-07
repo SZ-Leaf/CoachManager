@@ -95,8 +95,8 @@ export default function MessagesPage() {
     <AppPage title="Messages" description="Communications liées à vos joueurs.">
       <div className="crud-page">
         <div className="crud-toolbar">
-          <button type="button" className="btn-primary" onClick={openCreate}>
-            Nouveau message
+          <button type="button" className="btn btn-primary" onClick={openCreate}>
+            + Nouveau message
           </button>
         </div>
 
@@ -127,12 +127,13 @@ export default function MessagesPage() {
                     <td data-label="Sujet">{m.subject || '—'}</td>
                     <td data-label="Statut">{m.status || '—'}</td>
                     <td data-label="Actions" className="crud-table__actions">
-                      <button type="button" onClick={() => openEdit(m)}>
+                      <button type="button" className="btn btn-secondary" style={{ minHeight: '32px', padding: '0 12px', fontSize: '0.8125rem' }} onClick={() => openEdit(m)}>
                         Modifier
                       </button>
                       <button
                         type="button"
-                        className="btn-danger"
+                        className="btn btn-danger"
+                        style={{ minHeight: '32px', padding: '0 12px', fontSize: '0.8125rem' }}
                         onClick={() => {
                           if (window.confirm('Supprimer ?')) {
                             deleteMutation.mutate(m.id);
@@ -156,15 +157,15 @@ export default function MessagesPage() {
         title={editingId ? 'Modifier le message' : 'Nouveau message'}
       >
         <form
-          className="crud-form"
+          className="app-form"
           onSubmit={(e) => {
             e.preventDefault();
             saveMutation.mutate();
           }}
         >
           {formError ? <Alert variant="error">{formError}</Alert> : null}
-          <label>
-            Joueur *
+          <div>
+            <label>Joueur *</label>
             <select
               value={form.playerId}
               onChange={(e) => setForm({ ...form, playerId: e.target.value })}
@@ -177,9 +178,9 @@ export default function MessagesPage() {
                 </option>
               ))}
             </select>
-          </label>
-          <label>
-            Destinataire
+          </div>
+          <div>
+            <label>Destinataire</label>
             <select
               value={form.recipientType}
               onChange={(e) =>
@@ -189,9 +190,9 @@ export default function MessagesPage() {
               <option value="player">Joueur</option>
               <option value="emergency">Urgence</option>
             </select>
-          </label>
-          <label>
-            Email destinataire
+          </div>
+          <div>
+            <label>Email destinataire</label>
             <input
               type="email"
               value={form.recipientEmail}
@@ -199,24 +200,24 @@ export default function MessagesPage() {
                 setForm({ ...form, recipientEmail: e.target.value })
               }
             />
-          </label>
-          <label>
-            Sujet
+          </div>
+          <div>
+            <label>Sujet</label>
             <input
               value={form.subject}
               onChange={(e) => setForm({ ...form, subject: e.target.value })}
             />
-          </label>
-          <label>
-            Corps
+          </div>
+          <div>
+            <label>Corps</label>
             <textarea
               rows={4}
               value={form.body}
               onChange={(e) => setForm({ ...form, body: e.target.value })}
             />
-          </label>
-          <label>
-            Statut
+          </div>
+          <div>
+            <label>Statut</label>
             <select
               value={form.status}
               onChange={(e) => setForm({ ...form, status: e.target.value })}
@@ -225,12 +226,10 @@ export default function MessagesPage() {
               <option value="sent">Envoyé</option>
               <option value="failed">Échec</option>
             </select>
-          </label>
-          <div className="crud-form__actions">
-            <button type="submit" disabled={saveMutation.isPending}>
-              Enregistrer
-            </button>
           </div>
+          <button type="submit" className="btn btn-primary" disabled={saveMutation.isPending}>
+            Enregistrer
+          </button>
         </form>
       </Modal>
     </AppPage>

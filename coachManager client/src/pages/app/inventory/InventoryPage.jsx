@@ -142,7 +142,7 @@ export default function InventoryPage() {
             </select>
             <button
               type="button"
-              className="btn-primary"
+              className="btn btn-primary"
               disabled={!teamId || createInv.isPending}
               onClick={() => createInv.mutate()}
             >
@@ -178,7 +178,7 @@ export default function InventoryPage() {
               />
               <button
                 type="button"
-                className="btn-primary"
+                className="btn btn-primary"
                 disabled={!listName.trim() || createList.isPending}
                 onClick={() => createList.mutate()}
               >
@@ -190,14 +190,16 @@ export default function InventoryPage() {
                 <li key={l.id}>
                   <button
                     type="button"
-                    className={Number(listId) === l.id ? 'is-active' : ''}
+                    className={`btn btn-secondary ${Number(listId) === l.id ? 'is-active' : ''}`}
+                    style={{ flex: 1, justifyContent: 'flex-start', minHeight: '40px' }}
                     onClick={() => setListId(String(l.id))}
                   >
                     {l.name}
                   </button>
                   <button
                     type="button"
-                    className="btn-danger"
+                    className="btn btn-danger"
+                    style={{ minWidth: '40px', padding: 0 }}
                     onClick={() => {
                       if (window.confirm('Supprimer cette liste ?')) {
                         deleteList.mutate(l.id);
@@ -230,7 +232,7 @@ export default function InventoryPage() {
               />
               <button
                 type="button"
-                className="btn-primary"
+                className="btn btn-primary"
                 disabled={!productName.trim() || createProduct.isPending}
                 onClick={() => createProduct.mutate()}
               >
@@ -254,7 +256,8 @@ export default function InventoryPage() {
                       <td data-label="Actions" className="crud-table__actions">
                         <button
                           type="button"
-                          className="btn-danger"
+                          className="btn btn-danger"
+                          style={{ minHeight: '32px', padding: '0 12px', fontSize: '0.8125rem' }}
                           onClick={() => {
                             if (window.confirm('Supprimer ce produit ?')) {
                               deleteProduct.mutate(p.id);

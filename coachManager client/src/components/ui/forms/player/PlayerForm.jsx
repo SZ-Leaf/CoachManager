@@ -72,64 +72,64 @@ export default function PlayerForm({
   };
 
   return (
-    <form className="player-form crud-form" onSubmit={handleSubmit}>
+    <form className="app-form" onSubmit={handleSubmit}>
       <fieldset>
         <legend>Informations personnelles</legend>
-        <label>
-          Prénom *
+        <div>
+          <label>Prénom *</label>
           <input
             name="firstname"
             value={formData.firstname}
             onChange={handleChange}
             required
           />
-        </label>
-        <label>
-          Nom *
+        </div>
+        <div>
+          <label>Nom *</label>
           <input
             name="lastname"
             value={formData.lastname}
             onChange={handleChange}
             required
           />
-        </label>
-        <label>
-          Email
+        </div>
+        <div>
+          <label>Email</label>
           <input
             type="email"
             name="email"
             value={formData.email}
             onChange={handleChange}
           />
-        </label>
-        <label>
-          Téléphone
+        </div>
+        <div>
+          <label>Téléphone</label>
           <input
             type="tel"
             name="phoneNumber"
             value={formData.phoneNumber}
             onChange={handleChange}
           />
-        </label>
-        <label>
-          Date de naissance
+        </div>
+        <div>
+          <label>Date de naissance</label>
           <input
             type="date"
             name="birthday"
             value={formData.birthday}
             onChange={handleChange}
           />
-        </label>
-        <label>
-          Avatar (URL)
+        </div>
+        <div>
+          <label>Avatar (URL)</label>
           <input name="avatar" value={formData.avatar} onChange={handleChange} />
-        </label>
+        </div>
       </fieldset>
 
       <fieldset>
         <legend>Sport</legend>
-        <label>
-          Équipe *
+        <div>
+          <label>Équipe *</label>
           <select
             name="teamId"
             value={formData.teamId}
@@ -143,9 +143,9 @@ export default function PlayerForm({
               </option>
             ))}
           </select>
-        </label>
-        <label>
-          Poste
+        </div>
+        <div>
+          <label>Poste</label>
           <select name="position" value={formData.position} onChange={handleChange}>
             <option value="">—</option>
             {POSITIONS.map((p) => (
@@ -154,9 +154,9 @@ export default function PlayerForm({
               </option>
             ))}
           </select>
-        </label>
-        <label>
-          Statut
+        </div>
+        <div>
+          <label>Statut</label>
           <select name="status" value={formData.status} onChange={handleChange}>
             <option value="">—</option>
             {STATUSES.map((s) => (
@@ -165,9 +165,9 @@ export default function PlayerForm({
               </option>
             ))}
           </select>
-        </label>
-        <label>
-          Note
+        </div>
+        <div>
+          <label>Note</label>
           <input
             type="number"
             name="rating"
@@ -176,51 +176,49 @@ export default function PlayerForm({
             value={formData.rating}
             onChange={handleChange}
           />
-        </label>
+        </div>
       </fieldset>
 
       <fieldset>
         <legend>Urgence</legend>
-        <label>
-          Nom contact
+        <div>
+          <label>Nom contact</label>
           <input
             name="emergencyName"
             value={formData.emergencyName}
             onChange={handleChange}
           />
-        </label>
-        <label>
-          Email contact
+        </div>
+        <div>
+          <label>Email contact</label>
           <input
             type="email"
             name="emergencyEmail"
             value={formData.emergencyEmail}
             onChange={handleChange}
           />
-        </label>
-        <label>
-          Téléphone contact
+        </div>
+        <div>
+          <label>Téléphone contact</label>
           <input
             type="tel"
             name="emergencyPhoneNumber"
             value={formData.emergencyPhoneNumber}
             onChange={handleChange}
           />
-        </label>
+        </div>
       </fieldset>
 
       {serverErrors?.length ? (
-        <p className="form-server-error" role="alert">
+        <p className="form-error" role="alert">
           {fieldError(serverErrors, 'firstname') ||
             serverErrors.map((x) => x.message).join(' ')}
         </p>
       ) : null}
 
-      <div className="crud-form__actions">
-        <button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? 'Enregistrement…' : 'Enregistrer'}
-        </button>
-      </div>
+      <button type="submit" className="btn btn-primary" disabled={isSubmitting}>
+        {isSubmitting ? 'Enregistrement…' : 'Enregistrer'}
+      </button>
     </form>
   );
 }

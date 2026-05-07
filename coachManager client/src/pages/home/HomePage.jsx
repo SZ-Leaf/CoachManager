@@ -23,6 +23,21 @@ const HomePage = () => {
             </Link>
           </div>
         </main>
+
+        <section className="home-info">
+          <div className="info-item">
+            <h3>Gestion Simplifiée</h3>
+            <p>Gérez vos joueurs, vos équipes et vos entraînements en quelques clics seulement.</p>
+          </div>
+          <div className="info-item">
+            <h3>Suivi des Présences</h3>
+            <p>Gardez un œil sur l'assiduité de vos joueurs avec notre système de pointage intuitif.</p>
+          </div>
+          <div className="info-item">
+            <h3>Inventaire & Matériel</h3>
+            <p>Ne perdez plus jamais votre matériel grâce à notre gestionnaire de stock intégré.</p>
+          </div>
+        </section>
       </div>
     </>
   );

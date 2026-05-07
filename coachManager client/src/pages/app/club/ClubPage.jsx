@@ -90,8 +90,8 @@ export default function ClubPage() {
     >
       <div className="crud-page">
         <div className="crud-toolbar">
-          <button type="button" className="btn-primary" onClick={openCreate}>
-            Nouveau club
+          <button type="button" className="btn btn-primary" onClick={openCreate}>
+            + Nouveau club
           </button>
         </div>
 
@@ -123,12 +123,13 @@ export default function ClubPage() {
                     <td data-label="Nom">{c.name}</td>
                     <td data-label="Discipline">{c.discipline || '—'}</td>
                     <td data-label="Actions" className="crud-table__actions">
-                      <button type="button" onClick={() => openEdit(c)}>
+                      <button type="button" className="btn btn-secondary" style={{ minHeight: '32px', padding: '0 12px', fontSize: '0.8125rem' }} onClick={() => openEdit(c)}>
                         Modifier
                       </button>
                       <button
                         type="button"
-                        className="btn-danger"
+                        className="btn btn-danger"
+                        style={{ minHeight: '32px', padding: '0 12px', fontSize: '0.8125rem' }}
                         onClick={() => {
                           if (window.confirm('Supprimer ce club ?')) {
                             deleteMutation.mutate(c.id);
@@ -152,23 +153,23 @@ export default function ClubPage() {
         title={editing ? 'Modifier le club' : 'Nouveau club'}
       >
         <form
-          className="crud-form"
+          className="app-form"
           onSubmit={(e) => {
             e.preventDefault();
             saveMutation.mutate();
           }}
         >
           {formError ? <Alert variant="error">{formError}</Alert> : null}
-          <label>
-            Nom *
+          <div>
+            <label>Nom *</label>
             <input
               value={form.name}
               onChange={(e) => setForm({ ...form, name: e.target.value })}
               required
             />
-          </label>
-          <label>
-            Discipline
+          </div>
+          <div>
+            <label>Discipline</label>
             <select
               value={form.discipline}
               onChange={(e) => setForm({ ...form, discipline: e.target.value })}
@@ -180,27 +181,25 @@ export default function ClubPage() {
                 </option>
               ))}
             </select>
-          </label>
-          <label>
-            Logo (URL)
+          </div>
+          <div>
+            <label>Logo (URL)</label>
             <input
               value={form.logo}
               onChange={(e) => setForm({ ...form, logo: e.target.value })}
             />
-          </label>
-          <label>
-            Description
+          </div>
+          <div>
+            <label>Description</label>
             <textarea
               rows={3}
               value={form.description}
               onChange={(e) => setForm({ ...form, description: e.target.value })}
             />
-          </label>
-          <div className="crud-form__actions">
-            <button type="submit" disabled={saveMutation.isPending}>
-              {saveMutation.isPending ? 'Enregistrement…' : 'Enregistrer'}
-            </button>
           </div>
+          <button type="submit" className="btn btn-primary" disabled={saveMutation.isPending}>
+            {saveMutation.isPending ? 'Enregistrement…' : 'Enregistrer'}
+          </button>
         </form>
       </Modal>
     </AppPage>

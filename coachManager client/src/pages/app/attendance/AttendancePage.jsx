@@ -91,8 +91,8 @@ export default function AttendancePage() {
     <AppPage title="Présences" description="Feuilles de présence par joueur.">
       <div className="crud-page">
         <div className="crud-toolbar">
-          <button type="button" className="btn-primary" onClick={openCreate}>
-            Nouvelle présence
+          <button type="button" className="btn btn-primary" onClick={openCreate}>
+            + Nouvelle présence
           </button>
         </div>
 
@@ -123,12 +123,13 @@ export default function AttendancePage() {
                     <td data-label="Date">{a.date ? String(a.date).slice(0, 10) : '—'}</td>
                     <td data-label="Statut">{a.status || '—'}</td>
                     <td data-label="Actions" className="crud-table__actions">
-                      <button type="button" onClick={() => openEdit(a)}>
+                      <button type="button" className="btn btn-secondary" style={{ minHeight: '32px', padding: '0 12px', fontSize: '0.8125rem' }} onClick={() => openEdit(a)}>
                         Modifier
                       </button>
                       <button
                         type="button"
-                        className="btn-danger"
+                        className="btn btn-danger"
+                        style={{ minHeight: '32px', padding: '0 12px', fontSize: '0.8125rem' }}
                         onClick={() => {
                           if (window.confirm('Supprimer ?')) {
                             deleteMutation.mutate(a.id);
@@ -152,15 +153,15 @@ export default function AttendancePage() {
         title={editingId ? 'Modifier' : 'Nouvelle présence'}
       >
         <form
-          className="crud-form"
+          className="app-form"
           onSubmit={(e) => {
             e.preventDefault();
             saveMutation.mutate();
           }}
         >
           {formError ? <Alert variant="error">{formError}</Alert> : null}
-          <label>
-            Joueur *
+          <div>
+            <label>Joueur *</label>
             <select
               value={form.playerId}
               onChange={(e) => setForm({ ...form, playerId: e.target.value })}
@@ -173,17 +174,17 @@ export default function AttendancePage() {
                 </option>
               ))}
             </select>
-          </label>
-          <label>
-            Date
+          </div>
+          <div>
+            <label>Date</label>
             <input
               type="datetime-local"
               value={form.date}
               onChange={(e) => setForm({ ...form, date: e.target.value })}
             />
-          </label>
-          <label>
-            Statut
+          </div>
+          <div>
+            <label>Statut</label>
             <select
               value={form.status}
               onChange={(e) => setForm({ ...form, status: e.target.value })}
@@ -195,19 +196,17 @@ export default function AttendancePage() {
                 </option>
               ))}
             </select>
-          </label>
-          <label>
-            Commentaire
+          </div>
+          <div>
+            <label>Commentaire</label>
             <input
               value={form.comment}
               onChange={(e) => setForm({ ...form, comment: e.target.value })}
             />
-          </label>
-          <div className="crud-form__actions">
-            <button type="submit" disabled={saveMutation.isPending}>
-              Enregistrer
-            </button>
           </div>
+          <button type="submit" className="btn btn-primary" disabled={saveMutation.isPending}>
+            Enregistrer
+          </button>
         </form>
       </Modal>
     </AppPage>

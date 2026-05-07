@@ -61,41 +61,46 @@ const Header = ({ onMenuToggle, menuOpen }) => {
         </nav>
 
         <div className="layout-header__actions">
-          {hasSidebar ? (
+          {user ? (
             <>
-              <span className="layout-header__account" style={{ cursor: 'default' }}>
-                {user?.firstname}
-              </span>
-              <button
-                type="button"
-                className="layout-header__account layout-header__account--ghost"
-                onClick={handleLogout}
-              >
-                Déconnexion
-              </button>
-            </>
-          ) : user ? (
-            <>
-              <Link to={ROUTES.DASHBOARD} className="layout-header__account">
-                Espace coach
-              </Link>
-              <button
-                type="button"
-                className="layout-header__account layout-header__account--ghost"
-                onClick={handleLogout}
-              >
-                Déconnexion
-              </button>
+              {hasSidebar ? (
+                <div className="layout-header__user">
+                  <span className="layout-header__account" style={{ cursor: 'default', marginRight: '12px' }}>
+                    {user?.firstname}
+                  </span>
+                  <button
+                    type="button"
+                    className="btn btn-secondary"
+                    onClick={handleLogout}
+                    style={{ minHeight: '36px', padding: '0 12px', fontSize: '0.875rem' }}
+                  >
+                    Déconnexion
+                  </button>
+                </div>
+              ) : (
+                <>
+                  <Link to={ROUTES.DASHBOARD} className="btn btn-primary" style={{ minHeight: '40px' }}>
+                    Espace coach
+                  </Link>
+                  <button
+                    type="button"
+                    className="btn btn-ghost"
+                    onClick={handleLogout}
+                  >
+                    Déconnexion
+                  </button>
+                </>
+              )}
             </>
           ) : (
             <>
               <Link
                 to={ROUTES.LOGIN}
-                className="layout-header__account layout-header__account--ghost"
+                className="btn btn-ghost"
               >
                 Connexion
               </Link>
-              <Link to={ROUTES.REGISTER} className="layout-header__register">
+              <Link to={ROUTES.REGISTER} className="btn btn-primary">
                 Essai gratuit
               </Link>
             </>

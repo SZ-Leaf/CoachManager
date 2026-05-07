@@ -33,9 +33,7 @@ const LoginForm = () => {
   };
 
   return (
-    <form className="login-form" onSubmit={handleSubmit}>
-      <h2>Connexion</h2>
-
+    <form className="app-form" onSubmit={handleSubmit}>
       {error ? (
         <Alert variant="error" title="Erreur">
           {error}
@@ -68,7 +66,7 @@ const LoginForm = () => {
         />
       </div>
 
-      <button type="submit" disabled={pending}>
+      <button type="submit" className="btn btn-primary" disabled={pending}>
         {pending ? 'Connexion…' : 'Se connecter'}
       </button>
     </form>
