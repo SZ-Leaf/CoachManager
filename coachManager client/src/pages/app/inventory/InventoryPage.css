@@ -1,4 +1,4 @@
-/* Inventaire — sections empilées, listes de pilules tactiles */
+/* Inventaire — équipe puis listes en accordéon */
 .inventory-section {
   display: flex;
   flex-direction: column;
@@ -10,11 +10,23 @@
   box-shadow: var(--shadow-xs);
 }
 
+.inventory-section--aside {
+  border-style: dashed;
+  background: var(--color-bg);
+}
+
 .inventory-section h2 {
   margin: 0;
   font-size: var(--text-md);
   font-weight: 700;
   color: var(--color-text);
+}
+
+.inventory-section__lead {
+  margin: calc(var(--space-1) * -1) 0 0;
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+  line-height: 1.45;
 }
 
 .inventory-section select {
@@ -33,7 +45,8 @@
   box-shadow: 0 0 0 3px var(--color-primary-muted);
 }
 
-.inventory-pill-list {
+/* Accordéon listes / produits */
+.inventory-accordion {
   list-style: none;
   margin: 0;
   padding: 0;
@@ -42,22 +55,68 @@
   gap: var(--space-2);
 }
 
-.inventory-pill-list li {
+.inventory-accordion__item {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-bg);
+  overflow: hidden;
+}
+
+.inventory-accordion__row {
   display: flex;
   align-items: stretch;
   gap: var(--space-2);
+  padding: var(--space-2);
 }
 
-.inventory-pill-list .btn {
+.inventory-accordion__row .btn {
   min-height: 2.75rem;
 }
 
-.inventory-pill-list__select {
+.inventory-accordion__trigger {
   flex: 1;
   justify-content: flex-start;
+  gap: var(--space-2);
   text-align: left;
 }
 
+.inventory-accordion__chevron {
+  flex-shrink: 0;
+  width: 1.25rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--text-sm);
+  opacity: 0.75;
+}
+
+.inventory-accordion__title {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.inventory-accordion__panel {
+  padding: 0 var(--space-2) var(--space-3);
+  border-top: 1px solid var(--color-border);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.inventory-accordion__product-toolbar {
+  padding-top: var(--space-3);
+}
+
+.inventory-accordion__empty {
+  margin: 0;
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+}
+
+/* Renommage (ligne éditable) */
 .inventory-pill-list__rename-input {
   flex: 1;
   min-width: 0;
