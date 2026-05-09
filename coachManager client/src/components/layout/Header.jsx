@@ -54,6 +54,7 @@ const Header = ({ onMenuToggle, menuOpen }) => {
                 <li key={label}>
                   <NavLink
                     to={to}
+                    end={to === '/'}
                     className={({ isActive }) => (isActive ? 'is-active' : undefined)}
                   >
                     {label}
@@ -130,6 +131,7 @@ const Header = ({ onMenuToggle, menuOpen }) => {
                   <li key={label}>
                     <NavLink
                       to={to}
+                      end={to === '/'}
                       onClick={closePublicMenu}
                       className={({ isActive }) =>
                         isActive ? 'is-active' : undefined

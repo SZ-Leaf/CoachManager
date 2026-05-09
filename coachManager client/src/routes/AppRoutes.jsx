@@ -1,4 +1,4 @@
-import { Route, Routes } from 'react-router-dom';
+import { Navigate, Route, Routes } from 'react-router-dom';
 
 import AppLayout from '../components/layout/AppLayout.jsx';
 import AttendancePage from '../pages/app/attendance/AttendancePage.jsx';
@@ -13,7 +13,6 @@ import TeamDetailsPage from '../pages/app/teams/TeamDetailsPage.jsx';
 import TeamRollCallPage from '../pages/app/teams/TeamRollCallPage.jsx';
 import LoginPage from '../pages/auth/login/LoginPage.jsx';
 import RegisterPage from '../pages/auth/register/RegisterPage.jsx';
-import HomePage from '../pages/home/HomePage.jsx';
 import NotFoundPage from '../pages/NotFoundPage.jsx';
 import { GuestRoute } from './GuestRoute.jsx';
 import { ProtectedRoute } from './ProtectedRoute.jsx';
@@ -21,8 +20,6 @@ import { ProtectedRoute } from './ProtectedRoute.jsx';
 export function AppRoutes() {
   return (
     <Routes>
-      <Route path="/" element={<HomePage />} />
-
       <Route element={<GuestRoute />}>
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
@@ -30,7 +27,11 @@ export function AppRoutes() {
 
       <Route element={<ProtectedRoute />}>
         <Route element={<AppLayout />}>
-          <Route path="/tableau-de-bord" element={<DashboardPage />} />
+          <Route path="/" element={<DashboardPage />} />
+          <Route
+            path="/tableau-de-bord"
+            element={<Navigate to="/" replace />}
+          />
           <Route path="/club" element={<ClubPage />} />
           <Route path="/equipes" element={<TeamsPage />} />
           <Route path="/equipes/:id/appel" element={<TeamRollCallPage />} />

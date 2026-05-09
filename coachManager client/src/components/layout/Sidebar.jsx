@@ -22,6 +22,7 @@ const Sidebar = ({ open, onNavigate }) => {
               <li key={label}>
                 <NavLink
                   to={to}
+                  end={to === '/'}
                   onClick={onNavigate}
                   className={({ isActive }) => (isActive ? 'is-active' : undefined)}
                 >
