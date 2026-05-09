@@ -229,6 +229,7 @@
 
 .auth-form .btn-primary:hover:not(:disabled) {
   background: linear-gradient(180deg, #2dd4bf 0%, #0d9488 50%, #0f766e 100%);
+  color: #fff;
   box-shadow:
     0 2px 4px rgb(15 23 42 / 0.08),
     0 12px 28px rgb(13 148 136 / 0.32);
@@ -258,6 +259,61 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-4);
+}
+
+/* Avatar inscription : fichier + aperçu */
+.auth-avatar-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.auth-avatar-preview {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  border-radius: var(--radius-lg);
+  background: var(--color-primary-muted);
+  border: 1px dashed color-mix(in srgb, var(--color-primary) 35%, var(--color-border));
+}
+
+.auth-avatar-preview__img {
+  width: 3.5rem;
+  height: 3.5rem;
+  object-fit: cover;
+  border-radius: var(--radius-md);
+  border: 2px solid rgb(255 255 255 / 0.9);
+  box-shadow: var(--shadow-sm);
+}
+
+.auth-avatar-preview__actions {
+  flex: 1;
+  min-width: 8rem;
+}
+
+.auth-form.app-form input.auth-avatar-file-input[type='file'] {
+  min-height: auto;
+  padding: var(--space-2) 0;
+}
+
+.auth-avatar-file-input::file-selector-button {
+  margin-right: var(--space-3);
+  padding: var(--space-2) var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-elevated);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background-color var(--transition-fast), border-color var(--transition-fast);
+}
+
+.auth-avatar-file-input::file-selector-button:hover {
+  border-color: var(--color-border-strong);
+  background: var(--color-bg);
 }
 
 @media (min-width: 900px) {

@@ -28,13 +28,32 @@ final class UserController extends AbstractController
         SerializerInterface $serializer,
     ): JsonResponse {
         try {
-            $dto = $serializer->deserialize(
-                data: $request->getContent(),
-                type: RegisterUserRequest::class,
-                format: 'json'
-            );
+            $contentType = (string) $request->headers->get('Content-Type', '');
+            $isMultipart = str_contains($contentType, 'multipart/form-data');
 
-            $result = $registerUserService->registerUser($dto);
+            $rawAvatar = $request->files->get('avatar');
+            $avatarFile = $rawAvatar instanceof UploadedFile && \UPLOAD_ERR_NO_FILE !== $rawAvatar->getError()
+                ? $rawAvatar
+                : null;
+
+            if ($isMultipart) {
+                $dto = new RegisterUserRequest();
+                $dto->firstname = (string) $request->request->get('firstname', '');
+                $dto->lastname = (string) $request->request->get('lastname', '');
+                $dto->email = (string) $request->request->get('email', '');
+                $dto->password = (string) $request->request->get('password', '');
+                $urlAvatar = $request->request->get('avatar');
+                $dto->avatar = \is_string($urlAvatar) && $urlAvatar !== '' ? $urlAvatar : null;
+            } else {
+                $dto = $serializer->deserialize(
+                    data: $request->getContent(),
+                    type: RegisterUserRequest::class,
+                    format: 'json'
+                );
+                $avatarFile = null;
+            }
+
+            $result = $registerUserService->registerUser($dto, $avatarFile);
 
             return $this->json(['item' => $result], Response::HTTP_CREATED);
         } catch (RegisterUserException $e) {
