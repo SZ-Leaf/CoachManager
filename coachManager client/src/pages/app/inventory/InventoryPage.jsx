@@ -20,6 +20,9 @@ export default function InventoryPage() {
   const [productName, setProductName] = useState('');
   const [productQty, setProductQty] = useState('1');
   const [msg, setMsg] = useState('');
+  /** @type {number | null} */
+  const [editingListId, setEditingListId] = useState(null);
+  const [renameDraft, setRenameDraft] = useState('');
 
   const teamsQuery = useQuery({
     queryKey: ['teams'],
@@ -79,6 +82,17 @@ export default function InventoryPage() {
     onError: (e) => setMsg(e.message),
   });
 
+  const updateListName = useMutation({
+    mutationFn: ({ id, name }) =>
+      listApi.updateList(id, { name: name.trim() }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['lists'] });
+      setEditingListId(null);
+      setMsg('Liste mise à jour');
+    },
+    onError: (e) => setMsg(e.message),
+  });
+
   const createProduct = useMutation({
     mutationFn: () =>
       productApi.createProduct({
@@ -102,11 +116,41 @@ export default function InventoryPage() {
 
   const deleteList = useMutation({
     mutationFn: (id) => listApi.deleteList(id),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['lists'] }),
+    onSuccess: (_, deletedId) => {
+      qc.invalidateQueries({ queryKey: ['lists'] });
+      if (String(deletedId) === listId) {
+        setListId('');
+      }
+      if (deletedId === editingListId) {
+        setEditingListId(null);
+      }
+    },
   });
 
   const loading =
     teamsQuery.isLoading || invQuery.isLoading || listsQuery.isLoading;
+
+  const beginRename = (l) => {
+    setListId(String(l.id));
+    setEditingListId(l.id);
+    setRenameDraft(l.name);
+  };
+
+  const cancelRename = () => {
+    setEditingListId(null);
+  };
+
+  const commitRename = () => {
+    if (editingListId == null) return;
+    const trimmed = renameDraft.trim();
+    if (!trimmed) return;
+    const original = listsForInv.find((x) => x.id === editingListId)?.name;
+    if (trimmed === original) {
+      setEditingListId(null);
+      return;
+    }
+    updateListName.mutate({ id: editingListId, name: trimmed });
+  };
 
   return (
     <AppPage
@@ -187,24 +231,83 @@ export default function InventoryPage() {
             <ul className="inventory-pill-list">
               {listsForInv.map((l) => (
                 <li key={l.id}>
-                  <button
-                    type="button"
-                    className={`btn btn-secondary inventory-pill-list__select ${Number(listId) === l.id ? 'is-active' : ''}`}
-                    onClick={() => setListId(String(l.id))}
-                  >
-                    {l.name}
-                  </button>
-                  <button
-                    type="button"
-                    className="btn btn-danger inventory-pill-list__remove"
-                    onClick={() => {
-                      if (window.confirm('Supprimer cette liste ?')) {
-                        deleteList.mutate(l.id);
-                      }
-                    }}
-                  >
-                    ×
-                  </button>
+                  {editingListId === l.id ? (
+                    <>
+                      <input
+                        className="inventory-pill-list__rename-input"
+                        value={renameDraft}
+                        onChange={(e) => setRenameDraft(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            e.preventDefault();
+                            commitRename();
+                          }
+                          if (e.key === 'Escape') {
+                            e.preventDefault();
+                            cancelRename();
+                          }
+                        }}
+                        autoFocus
+                        aria-label="Nom de la liste"
+                      />
+                      <button
+                        type="button"
+                        className="btn btn-primary inventory-pill-list__action"
+                        title="Enregistrer"
+                        aria-label="Enregistrer"
+                        disabled={
+                          !renameDraft.trim() ||
+                          renameDraft.trim() === l.name ||
+                          updateListName.isPending
+                        }
+                        onClick={() => commitRename()}
+                      >
+                        ✓
+                      </button>
+                      <button
+                        type="button"
+                        className="btn btn-secondary inventory-pill-list__action"
+                        title="Annuler"
+                        aria-label="Annuler"
+                        disabled={updateListName.isPending}
+                        onClick={() => cancelRename()}
+                      >
+                        ×
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <button
+                        type="button"
+                        className={`btn btn-secondary inventory-pill-list__select ${Number(listId) === l.id ? 'is-active' : ''}`}
+                        onClick={() => setListId(String(l.id))}
+                      >
+                        {l.name}
+                      </button>
+                      <button
+                        type="button"
+                        className="btn btn-secondary inventory-pill-list__action"
+                        title="Renommer"
+                        aria-label="Renommer"
+                        onClick={() => beginRename(l)}
+                      >
+                        ✎
+                      </button>
+                      <button
+                        type="button"
+                        className="btn btn-danger inventory-pill-list__action"
+                        title="Supprimer"
+                        aria-label="Supprimer"
+                        onClick={() => {
+                          if (window.confirm('Supprimer cette liste ?')) {
+                            deleteList.mutate(l.id);
+                          }
+                        }}
+                      >
+                        ×
+                      </button>
+                    </>
+                  )}
                 </li>
               ))}
             </ul>

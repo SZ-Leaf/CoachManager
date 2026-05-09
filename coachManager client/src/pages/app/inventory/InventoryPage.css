@@ -58,7 +58,24 @@
   text-align: left;
 }
 
-.inventory-pill-list__remove {
+.inventory-pill-list__rename-input {
+  flex: 1;
+  min-width: 0;
+  min-height: 2.75rem;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-elevated);
+  font-size: var(--text-base);
+}
+
+.inventory-pill-list__rename-input:focus-visible {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px var(--color-primary-muted);
+}
+
+.inventory-pill-list__action {
   min-width: 2.5rem;
   padding: 0;
   flex-shrink: 0;
