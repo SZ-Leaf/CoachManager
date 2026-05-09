@@ -23,6 +23,10 @@ export default function InventoryPage() {
   /** @type {number | null} */
   const [editingListId, setEditingListId] = useState(null);
   const [renameDraft, setRenameDraft] = useState('');
+  /** @type {number | null} */
+  const [editingProductId, setEditingProductId] = useState(null);
+  const [productNameDraft, setProductNameDraft] = useState('');
+  const [productQtyDraft, setProductQtyDraft] = useState('');
 
   const teamsQuery = useQuery({
     queryKey: ['teams'],
@@ -74,6 +78,7 @@ export default function InventoryPage() {
   useEffect(() => {
     setProductName('');
     setProductQty('1');
+    setEditingProductId(null);
   }, [expandedListId]);
 
   const createInv = useMutation({
@@ -134,9 +139,28 @@ export default function InventoryPage() {
     onError: (e) => setMsg(e.message),
   });
 
+  const updateProductMutation = useMutation({
+    mutationFn: ({ id, name, quantity }) =>
+      productApi.updateProduct(id, {
+        name: name.trim(),
+        quantity,
+      }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['products'] });
+      setEditingProductId(null);
+      setMsg('Produit mis à jour');
+    },
+    onError: (e) => setMsg(e.message),
+  });
+
   const deleteProduct = useMutation({
     mutationFn: (id) => productApi.deleteProduct(id),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['products'] }),
+    onSuccess: (_, deletedId) => {
+      qc.invalidateQueries({ queryKey: ['products'] });
+      if (deletedId === editingProductId) {
+        setEditingProductId(null);
+      }
+    },
   });
 
   const deleteList = useMutation({
@@ -183,6 +207,40 @@ export default function InventoryPage() {
   const toggleListExpanded = (id) => {
     const idStr = String(id);
     setExpandedListId((prev) => (prev === idStr ? '' : idStr));
+  };
+
+  const parseProductQuantity = (raw) => {
+    const n = Number(raw);
+    if (!Number.isFinite(n) || n < 0) {
+      return 0;
+    }
+    return Math.floor(n);
+  };
+
+  const beginEditProduct = (p) => {
+    setEditingProductId(p.id);
+    setProductNameDraft(p.name);
+    setProductQtyDraft(String(p.quantity));
+  };
+
+  const cancelEditProduct = () => {
+    setEditingProductId(null);
+  };
+
+  const commitEditProduct = (p) => {
+    if (editingProductId !== p.id) return;
+    const trimmed = productNameDraft.trim();
+    if (!trimmed) return;
+    const qty = parseProductQuantity(productQtyDraft);
+    if (trimmed === p.name && qty === p.quantity) {
+      setEditingProductId(null);
+      return;
+    }
+    updateProductMutation.mutate({
+      id: p.id,
+      name: trimmed,
+      quantity: qty,
+    });
   };
 
   return (
@@ -404,41 +462,164 @@ export default function InventoryPage() {
                                 </p>
                               ) : (
                                 <div className="crud-table-wrap">
-                                  <table className="crud-table">
+                                  <table className="crud-table inventory-product-table">
                                     <thead>
                                       <tr>
-                                        <th>Nom</th>
-                                        <th>Qté</th>
+                                        <th className="inventory-product-table__name-col">
+                                          Nom
+                                        </th>
+                                        <th className="inventory-product-table__qty-col">
+                                          Qté
+                                        </th>
                                         <th />
                                       </tr>
                                     </thead>
                                     <tbody>
                                       {listProducts.map((p) => (
                                         <tr key={p.id}>
-                                          <td data-label="Nom">{p.name}</td>
-                                          <td data-label="Qté">
-                                            {p.quantity}
-                                          </td>
-                                          <td
-                                            data-label="Actions"
-                                            className="crud-table__actions"
-                                          >
-                                            <button
-                                              type="button"
-                                              className="btn btn-danger btn-compact"
-                                              onClick={() => {
-                                                if (
-                                                  window.confirm(
-                                                    'Supprimer ce produit ?',
-                                                  )
-                                                ) {
-                                                  deleteProduct.mutate(p.id);
-                                                }
-                                              }}
-                                            >
-                                              Supprimer
-                                            </button>
-                                          </td>
+                                          {editingProductId === p.id ? (
+                                            <>
+                                              <td
+                                                data-label="Nom"
+                                                className="inventory-product-table__name-cell"
+                                              >
+                                                <input
+                                                  className="inventory-product-edit__input"
+                                                  value={productNameDraft}
+                                                  onChange={(e) =>
+                                                    setProductNameDraft(
+                                                      e.target.value,
+                                                    )
+                                                  }
+                                                  onKeyDown={(e) => {
+                                                    if (e.key === 'Enter') {
+                                                      e.preventDefault();
+                                                      commitEditProduct(p);
+                                                    }
+                                                    if (e.key === 'Escape') {
+                                                      e.preventDefault();
+                                                      cancelEditProduct();
+                                                    }
+                                                  }}
+                                                  autoFocus
+                                                  aria-label="Nom du produit"
+                                                />
+                                              </td>
+                                              <td
+                                                data-label="Qté"
+                                                className="inventory-product-table__qty-cell"
+                                              >
+                                                <input
+                                                  type="number"
+                                                  min={0}
+                                                  className="inventory-product-edit__input inventory-product-edit__input--qty"
+                                                  value={productQtyDraft}
+                                                  onChange={(e) =>
+                                                    setProductQtyDraft(
+                                                      e.target.value,
+                                                    )
+                                                  }
+                                                  onKeyDown={(e) => {
+                                                    if (e.key === 'Enter') {
+                                                      e.preventDefault();
+                                                      commitEditProduct(p);
+                                                    }
+                                                    if (e.key === 'Escape') {
+                                                      e.preventDefault();
+                                                      cancelEditProduct();
+                                                    }
+                                                  }}
+                                                  aria-label="Quantité"
+                                                />
+                                              </td>
+                                              <td
+                                                data-label="Actions"
+                                                className="crud-table__actions inventory-product-edit__actions"
+                                              >
+                                                <button
+                                                  type="button"
+                                                  className="btn btn-primary btn-compact inventory-product-edit__icon-btn"
+                                                  title="Enregistrer"
+                                                  aria-label="Enregistrer"
+                                                  disabled={
+                                                    !productNameDraft.trim() ||
+                                                    updateProductMutation.isPending
+                                                  }
+                                                  onClick={() =>
+                                                    commitEditProduct(p)
+                                                  }
+                                                >
+                                                  ✓
+                                                </button>
+                                                <button
+                                                  type="button"
+                                                  className="btn btn-secondary btn-compact inventory-product-edit__icon-btn"
+                                                  title="Annuler"
+                                                  aria-label="Annuler"
+                                                  disabled={
+                                                    updateProductMutation.isPending
+                                                  }
+                                                  onClick={() =>
+                                                    cancelEditProduct()
+                                                  }
+                                                >
+                                                  ×
+                                                </button>
+                                              </td>
+                                            </>
+                                          ) : (
+                                            <>
+                                              <td
+                                                data-label="Nom"
+                                                className="inventory-product-table__name-cell"
+                                              >
+                                                <span className="inventory-product-name">
+                                                  {p.name}
+                                                </span>
+                                              </td>
+                                              <td
+                                                data-label="Qté"
+                                                className="inventory-product-table__qty-cell"
+                                              >
+                                                <span className="inventory-product-qty">
+                                                  {p.quantity}
+                                                </span>
+                                              </td>
+                                              <td
+                                                data-label="Actions"
+                                                className="crud-table__actions inventory-product-edit__actions"
+                                              >
+                                                <button
+                                                  type="button"
+                                                  className="btn btn-secondary btn-compact inventory-product-edit__icon-btn"
+                                                  title="Modifier"
+                                                  aria-label="Modifier"
+                                                  onClick={() =>
+                                                    beginEditProduct(p)
+                                                  }
+                                                >
+                                                  ✎
+                                                </button>
+                                                <button
+                                                  type="button"
+                                                  className="btn btn-danger btn-compact"
+                                                  onClick={() => {
+                                                    if (
+                                                      window.confirm(
+                                                        'Supprimer ce produit ?',
+                                                      )
+                                                    ) {
+                                                      deleteProduct.mutate(
+                                                        p.id,
+                                                      );
+                                                    }
+                                                  }}
+                                                >
+                                                  Supprimer
+                                                </button>
+                                              </td>
+                                            </>
+                                          )}
                                         </tr>
                                       ))}
                                     </tbody>
