@@ -7,6 +7,8 @@ import Spinner from '../../../components/ui/feedback/Spinner.jsx';
 import Alert from '../../../components/ui/feedback/Alert.jsx';
 import EmptyState from '../../../components/ui/feedback/EmptyState.jsx';
 import { ROUTES } from '../../../utils/routes.js';
+import { formatPlayerPosition } from '../../../utils/playerPosition.js';
+import { formatPlayerStatus } from '../../../utils/playerStatus.js';
 
 const PlayerDetailsPage = () => {
   const { id } = useParams();
@@ -90,13 +92,13 @@ const PlayerDetailsPage = () => {
               <div className="activity-item">
                 <div className="activity-content">
                   <p><strong>Poste</strong></p>
-                  <span>{player.position || 'Non défini'}</span>
+                  <span>{formatPlayerPosition(player.position) || 'Non défini'}</span>
                 </div>
               </div>
               <div className="activity-item">
                 <div className="activity-content">
                   <p><strong>Statut</strong></p>
-                  <span>{player.status || 'Actif'}</span>
+                  <span>{formatPlayerStatus(player.status) || 'Non défini'}</span>
                 </div>
               </div>
               <div className="activity-item">

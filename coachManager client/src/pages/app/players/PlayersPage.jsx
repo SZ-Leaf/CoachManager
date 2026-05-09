@@ -11,6 +11,7 @@ import * as teamApi from '../../../services/teamService.js';
 import AppPage from '../AppPage.jsx';
 import { Link } from 'react-router-dom';
 import { ROUTES } from '../../../utils/routes.js';
+import { formatPlayerPosition } from '../../../utils/playerPosition.js';
 
 function birthdayInputValue(iso) {
   if (!iso) return '';
@@ -141,7 +142,7 @@ export default function PlayersPage() {
                       </Link>
                     </td>
                     <td data-label="Équipe">{p.teamId ?? '—'}</td>
-                    <td data-label="Poste">{p.position || '—'}</td>
+                    <td data-label="Poste">{formatPlayerPosition(p.position) || '—'}</td>
                     <td data-label="Actions" className="crud-table__actions crud-table__actions--split">
                       <div className="crud-table__actions-start">
                         <Link to={ROUTES.PLAYER_DETAILS.replace(':id', p.id)} className="btn btn-secondary btn-compact">

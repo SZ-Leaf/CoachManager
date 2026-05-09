@@ -1,18 +1,7 @@
 import { useEffect, useState } from 'react';
 
-const POSITIONS = [
-  { value: 'goalkeeper', label: 'Gardien' },
-  { value: 'defender', label: 'Défenseur' },
-  { value: 'midfielder', label: 'Milieu' },
-  { value: 'forward', label: 'Attaquant' },
-  { value: 'other', label: 'Autre' },
-];
-const STATUSES = [
-  { value: 'active', label: 'Actif' },
-  { value: 'injured', label: 'Blessé' },
-  { value: 'suspended', label: 'Suspendu' },
-  { value: 'inactive', label: 'Inactif' },
-];
+import { PLAYER_POSITIONS } from '../../../../utils/playerPosition.js';
+import { PLAYER_STATUSES } from '../../../../utils/playerStatus.js';
 
 function fieldError(serverErrors, field) {
   const row = serverErrors?.find((e) => e.field === field);
@@ -148,7 +137,7 @@ export default function PlayerForm({
           <label>Poste</label>
           <select name="position" value={formData.position} onChange={handleChange}>
             <option value="">—</option>
-            {POSITIONS.map((p) => (
+            {PLAYER_POSITIONS.map((p) => (
               <option key={p.value} value={p.value}>
                 {p.label}
               </option>
@@ -159,7 +148,7 @@ export default function PlayerForm({
           <label>Statut</label>
           <select name="status" value={formData.status} onChange={handleChange}>
             <option value="">—</option>
-            {STATUSES.map((s) => (
+            {PLAYER_STATUSES.map((s) => (
               <option key={s.value} value={s.value}>
                 {s.label}
               </option>

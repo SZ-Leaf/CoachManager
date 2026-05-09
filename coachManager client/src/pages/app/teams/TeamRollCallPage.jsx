@@ -10,6 +10,7 @@ import * as playerApi from '../../../services/playerService.js';
 import * as teamApi from '../../../services/teamService.js';
 import AppPage from '../AppPage.jsx';
 import { ROUTES } from '../../../utils/routes.js';
+import { formatPlayerPosition } from '../../../utils/playerPosition.js';
 import './TeamRollCallPage.css';
 
 const STATUS_OPTIONS = [
@@ -311,7 +312,7 @@ export default function TeamRollCallPage() {
                         {p.firstname} {p.lastname}
                       </span>
                       {p.position ? (
-                        <span className="roll-call__meta">{p.position}</span>
+                        <span className="roll-call__meta">{formatPlayerPosition(p.position)}</span>
                       ) : null}
                     </div>
                     <div className="roll-call__status">

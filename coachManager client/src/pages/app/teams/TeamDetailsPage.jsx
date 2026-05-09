@@ -7,6 +7,8 @@ import Spinner from '../../../components/ui/feedback/Spinner.jsx';
 import Alert from '../../../components/ui/feedback/Alert.jsx';
 import EmptyState from '../../../components/ui/feedback/EmptyState.jsx';
 import { ROUTES } from '../../../utils/routes.js';
+import { formatPlayerPosition } from '../../../utils/playerPosition.js';
+import { formatPlayerStatus } from '../../../utils/playerStatus.js';
 import './TeamDetailsPage.css';
 
 const TeamDetailsPage = () => {
@@ -73,8 +75,8 @@ const TeamDetailsPage = () => {
                           {p.firstname} {p.lastname}
                         </Link>
                       </td>
-                      <td data-label="Poste">{p.position || '—'}</td>
-                      <td data-label="Statut">{p.status || '—'}</td>
+                      <td data-label="Poste">{formatPlayerPosition(p.position) || '—'}</td>
+                      <td data-label="Statut">{formatPlayerStatus(p.status) || '—'}</td>
                       <td data-label="Actions" className="crud-table__actions">
                         <Link to={ROUTES.PLAYER_DETAILS.replace(':id', p.id)} className="btn btn-secondary btn-compact">
                           Voir fiche

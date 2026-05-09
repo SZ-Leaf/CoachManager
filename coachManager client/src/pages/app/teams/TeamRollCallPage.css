@@ -184,8 +184,6 @@
 .roll-call__meta {
   font-size: var(--text-xs);
   color: var(--color-text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
 }
 
 .roll-call__status {
