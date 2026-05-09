@@ -6,6 +6,7 @@ import Alert from '../../../components/ui/feedback/Alert.jsx';
 import EmptyState from '../../../components/ui/feedback/EmptyState.jsx';
 import Spinner from '../../../components/ui/feedback/Spinner.jsx';
 import * as attendanceApi from '../../../services/attendanceService.js';
+import * as playerApi from '../../../services/playerService.js';
 import * as teamApi from '../../../services/teamService.js';
 import AppPage from '../AppPage.jsx';
 import { ROUTES } from '../../../utils/routes.js';
@@ -31,6 +32,21 @@ function localInputToIso(localString) {
   return d.toISOString();
 }
 
+/** Réponse API parfois en snake_case selon proxies / vieilles versions. */
+function normalizeRollRow(row) {
+  if (!row || typeof row !== 'object') return null;
+  const playerId = row.playerId ?? row.player_id;
+  if (playerId == null || Number.isNaN(Number(playerId))) return null;
+  return {
+    playerId: Number(playerId),
+    firstname: row.firstname ?? row.first_name ?? '',
+    lastname: row.lastname ?? row.last_name ?? '',
+    position: row.position ?? null,
+    status: row.status ?? undefined,
+    attendanceId: row.attendanceId ?? row.attendance_id ?? undefined,
+  };
+}
+
 export default function TeamRollCallPage() {
   const { id: teamId } = useParams();
   const qc = useQueryClient();
@@ -38,7 +54,11 @@ export default function TeamRollCallPage() {
   const [statusByPlayer, setStatusByPlayer] = useState({});
   const [saveMsg, setSaveMsg] = useState(null);
 
-  const sessionIso = useMemo(() => localInputToIso(sessionLocal), [sessionLocal]);
+  const sessionIso = useMemo(() => {
+    const iso = localInputToIso(sessionLocal);
+    if (iso) return iso;
+    return new Date().toISOString();
+  }, [sessionLocal]);
 
   const teamQuery = useQuery({
     queryKey: ['team', teamId],
@@ -46,10 +66,16 @@ export default function TeamRollCallPage() {
     enabled: Boolean(teamId),
   });
 
+  const playersListQuery = useQuery({
+    queryKey: ['players'],
+    queryFn: playerApi.fetchPlayers,
+    enabled: Boolean(teamId && teamQuery.isSuccess),
+  });
+
   const rollQuery = useQuery({
     queryKey: ['teamRollCall', teamId, sessionIso],
     queryFn: () => attendanceApi.fetchTeamRollCall(teamId, sessionIso),
-    enabled: Boolean(teamId && sessionIso && teamQuery.isSuccess),
+    enabled: Boolean(teamId && teamQuery.isSuccess),
     retry: (failureCount, error) => {
       const status = typeof error?.status === 'number' ? error.status : null;
       if (status !== null && status >= 400 && status < 500) return false;
@@ -57,16 +83,48 @@ export default function TeamRollCallPage() {
     },
   });
 
-  const players = rollQuery.data?.players ?? [];
+  const rosterFromListApi = useMemo(() => {
+    const items = playersListQuery.data?.items ?? [];
+    return items
+      .filter((p) => String(p.teamId) === String(teamId))
+      .map((p) => ({
+        playerId: p.id,
+        firstname: p.firstname ?? '',
+        lastname: p.lastname ?? '',
+        position: p.position ?? null,
+        status: undefined,
+        attendanceId: undefined,
+      }));
+  }, [playersListQuery.data, teamId]);
+
+  const players = useMemo(() => {
+    const raw = rollQuery.data?.players;
+    const fromApi = Array.isArray(raw)
+      ? raw.map(normalizeRollRow).filter(Boolean)
+      : [];
+    if (fromApi.length > 0) return fromApi;
+    if (!rosterFromListApi.length) return [];
+    if (
+      rollQuery.isSuccess &&
+      Array.isArray(raw) &&
+      raw.length === 0
+    ) {
+      return rosterFromListApi;
+    }
+    if (rollQuery.isError) {
+      return rosterFromListApi;
+    }
+    return [];
+  }, [rollQuery.data, rollQuery.isSuccess, rollQuery.isError, rosterFromListApi]);
 
   useEffect(() => {
-    if (!rollQuery.data?.players) return;
+    if (!players.length) return;
     const next = {};
-    for (const row of rollQuery.data.players) {
+    for (const row of players) {
       next[row.playerId] = row.status ?? 'absent';
     }
     setStatusByPlayer(next);
-  }, [rollQuery.data]);
+  }, [rollQuery.data, players]);
 
   const saveMutation = useMutation({
     mutationFn: () =>
@@ -177,12 +235,14 @@ export default function TeamRollCallPage() {
           </p>
         </div>
 
-        {rollQuery.isLoading ? <Spinner label="Chargement de la feuille d’appel…" /> : null}
-        {rollQuery.error ? (
-          <Alert variant="error">{rollQuery.error.message}</Alert>
+        {playersListQuery.isLoading || rollQuery.isLoading ? (
+          <Spinner label="Chargement de la feuille d’appel…" />
         ) : null}
 
-        {!rollQuery.isLoading && players.length === 0 ? (
+        {!playersListQuery.isLoading &&
+        !rollQuery.isLoading &&
+        !rollQuery.isFetching &&
+        players.length === 0 ? (
           <EmptyState
             title="Aucun joueur dans cette équipe"
             description="Ajoutez des joueurs rattachés à cette équipe pour faire l’appel."
@@ -227,39 +287,64 @@ export default function TeamRollCallPage() {
             </div>
 
             <ul className="roll-call__list">
-              {players.map((p) => (
-                <li key={p.playerId} className="roll-call__row">
-                  <div className="roll-call__player">
-                    <span className="roll-call__name">
-                      {p.firstname} {p.lastname}
-                    </span>
-                    {p.position ? (
-                      <span className="roll-call__meta">{p.position}</span>
-                    ) : null}
-                  </div>
-                  <div className="roll-call__status">
-                    <label className="sr-only" htmlFor={`status-${p.playerId}`}>
-                      Statut pour {p.firstname} {p.lastname}
+              {players.map((p) => {
+                const status = statusByPlayer[p.playerId] ?? 'absent';
+                const isPresent = status === 'present';
+                return (
+                  <li key={p.playerId} className="roll-call__row">
+                    <label className="roll-call__check">
+                      <input
+                        type="checkbox"
+                        checked={isPresent}
+                        onChange={(e) =>
+                          setStatusByPlayer((prev) => ({
+                            ...prev,
+                            [p.playerId]: e.target.checked ? 'present' : 'absent',
+                          }))
+                        }
+                      />
+                      <span className="roll-call__check-ui" aria-hidden />
+                      <span className="roll-call__check-label">Présent</span>
                     </label>
-                    <select
-                      id={`status-${p.playerId}`}
-                      value={statusByPlayer[p.playerId] ?? 'absent'}
-                      onChange={(e) =>
-                        setStatusByPlayer((prev) => ({
-                          ...prev,
-                          [p.playerId]: e.target.value,
-                        }))
-                      }
-                    >
-                      {STATUS_OPTIONS.map((o) => (
-                        <option key={o.value} value={o.value}>
-                          {o.label}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                </li>
-              ))}
+                    <div className="roll-call__player">
+                      <span className="roll-call__name">
+                        {p.firstname} {p.lastname}
+                      </span>
+                      {p.position ? (
+                        <span className="roll-call__meta">{p.position}</span>
+                      ) : null}
+                    </div>
+                    <div className="roll-call__status">
+                      {!isPresent ? (
+                        <>
+                          <span className="roll-call__status-label">Sinon :</span>
+                          <label className="sr-only" htmlFor={`status-${p.playerId}`}>
+                            Détail du statut pour {p.firstname} {p.lastname}
+                          </label>
+                          <select
+                            id={`status-${p.playerId}`}
+                            value={status === 'present' ? 'absent' : status}
+                            onChange={(e) =>
+                              setStatusByPlayer((prev) => ({
+                                ...prev,
+                                [p.playerId]: e.target.value,
+                              }))
+                            }
+                          >
+                            {STATUS_OPTIONS.filter((o) => o.value !== 'present').map((o) => (
+                              <option key={o.value} value={o.value}>
+                                {o.label}
+                              </option>
+                            ))}
+                          </select>
+                        </>
+                      ) : (
+                        <span className="roll-call__status-present">Marqué présent</span>
+                      )}
+                    </div>
+                  </li>
+                );
+              })}
             </ul>
 
             <div className="roll-call__footer">
