@@ -126,30 +126,34 @@ export default function TeamsPage() {
                     <td data-label="Catégorie">{t.category || '—'}</td>
                     <td data-label="Saison">{t.season || '—'}</td>
                     <td data-label="Club">{t.clubId ?? '—'}</td>
-                    <td data-label="Actions" className="crud-table__actions">
-                      <Link
-                        to={ROUTES.TEAM_ROLL_CALL.replace(':id', t.id)}
-                        className="btn btn-primary btn-compact"
-                      >
-                        Appel
-                      </Link>
-                      <Link to={ROUTES.TEAM_DETAILS.replace(':id', t.id)} className="btn btn-secondary btn-compact">
-                        Détails
-                      </Link>
-                      <button type="button" className="btn btn-secondary btn-compact" onClick={() => openEdit(t)}>
-                        Modifier
-                      </button>
-                      <button
-                        type="button"
-                        className="btn btn-danger btn-compact"
-                        onClick={() => {
-                          if (window.confirm('Supprimer cette équipe ?')) {
-                            deleteMutation.mutate(t.id);
-                          }
-                        }}
-                      >
-                        Supprimer
-                      </button>
+                    <td data-label="Actions" className="crud-table__actions crud-table__actions--split">
+                      <div className="crud-table__actions-start">
+                        <Link
+                          to={ROUTES.TEAM_ROLL_CALL.replace(':id', t.id)}
+                          className="btn btn-primary btn-compact"
+                        >
+                          Appel
+                        </Link>
+                        <Link to={ROUTES.TEAM_DETAILS.replace(':id', t.id)} className="btn btn-secondary btn-compact">
+                          Détails
+                        </Link>
+                      </div>
+                      <div className="crud-table__actions-end">
+                        <button type="button" className="btn btn-secondary btn-compact" onClick={() => openEdit(t)}>
+                          Modifier
+                        </button>
+                        <button
+                          type="button"
+                          className="btn btn-danger btn-compact"
+                          onClick={() => {
+                            if (window.confirm('Supprimer cette équipe ?')) {
+                              deleteMutation.mutate(t.id);
+                            }
+                          }}
+                        >
+                          Supprimer
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}

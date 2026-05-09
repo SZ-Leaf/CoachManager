@@ -110,6 +110,41 @@
   margin-right: 0;
 }
 
+/* Équipes / Joueurs : liens à gauche, modifier / supprimer à droite (desktop) */
+@media (min-width: 768px) {
+  .teams-page .crud-table th:last-child,
+  .players-page .crud-table th:last-child {
+    text-align: right;
+  }
+
+  .teams-page .crud-table__actions--split,
+  .players-page .crud-table__actions--split {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+  }
+
+  .crud-table__actions-start,
+  .crud-table__actions-end {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2);
+  }
+
+  .crud-table__actions-end {
+    margin-left: auto;
+    justify-content: flex-end;
+  }
+
+  .teams-page .crud-table__actions--split .btn,
+  .players-page .crud-table__actions--split .btn {
+    margin: 0;
+  }
+}
+
 /* Cartes empilées sur mobile (pattern data-label déjà présent dans le JSX) */
 @media (max-width: 767px) {
   .crud-table thead {
@@ -179,5 +214,13 @@
   .crud-table__actions .btn {
     width: 100%;
     margin: 0;
+  }
+
+  .crud-table__actions--split .crud-table__actions-start,
+  .crud-table__actions--split .crud-table__actions-end {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    gap: var(--space-2);
   }
 }
