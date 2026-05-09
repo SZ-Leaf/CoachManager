@@ -9,4 +9,6 @@ export const ROUTES = {
   ATTENDANCE: '/presences',
   INVENTORY: '/inventaire',
   MESSAGES: '/messages',
+  TEAM_DETAILS: '/equipes/:id',
+  PLAYER_DETAILS: '/joueurs/:id',
 };

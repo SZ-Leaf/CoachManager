@@ -8,6 +8,8 @@ import Spinner from '../../../components/ui/feedback/Spinner.jsx';
 import * as teamApi from '../../../services/teamService.js';
 import * as clubApi from '../../../services/clubService.js';
 import AppPage from '../AppPage.jsx';
+import { Link } from 'react-router-dom';
+import { ROUTES } from '../../../utils/routes.js';
 
 import './teams.css';
 
@@ -118,11 +120,18 @@ export default function TeamsPage() {
               <tbody>
                 {teams.map((t) => (
                   <tr key={t.id}>
-                    <td data-label="Nom">{t.name}</td>
+                    <td data-label="Nom">
+                      <Link to={ROUTES.TEAM_DETAILS.replace(':id', t.id)} style={{ color: 'var(--primary)', fontWeight: '600' }}>
+                        {t.name}
+                      </Link>
+                    </td>
                     <td data-label="Catégorie">{t.category || '—'}</td>
                     <td data-label="Saison">{t.season || '—'}</td>
                     <td data-label="Club">{t.clubId ?? '—'}</td>
                     <td data-label="Actions" className="crud-table__actions">
+                      <Link to={ROUTES.TEAM_DETAILS.replace(':id', t.id)} className="btn btn-secondary" style={{ minHeight: '32px', padding: '0 12px', fontSize: '0.8125rem' }}>
+                        Détails
+                      </Link>
                       <button type="button" className="btn btn-secondary" style={{ minHeight: '32px', padding: '0 12px', fontSize: '0.8125rem' }} onClick={() => openEdit(t)}>
                         Modifier
                       </button>

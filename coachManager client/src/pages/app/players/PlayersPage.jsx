@@ -9,6 +9,8 @@ import PlayerForm from '../../../components/ui/forms/player/PlayerForm.jsx';
 import * as playerApi from '../../../services/playerService.js';
 import * as teamApi from '../../../services/teamService.js';
 import AppPage from '../AppPage.jsx';
+import { Link } from 'react-router-dom';
+import { ROUTES } from '../../../utils/routes.js';
 
 import '../teams/teams.css';
 
@@ -136,11 +138,16 @@ export default function PlayersPage() {
                 {players.map((p) => (
                   <tr key={p.id}>
                     <td data-label="Nom">
-                      {p.firstname} {p.lastname}
+                      <Link to={ROUTES.PLAYER_DETAILS.replace(':id', p.id)} style={{ color: 'var(--primary)', fontWeight: '600' }}>
+                        {p.firstname} {p.lastname}
+                      </Link>
                     </td>
                     <td data-label="Équipe">{p.teamId ?? '—'}</td>
                     <td data-label="Poste">{p.position || '—'}</td>
                     <td data-label="Actions" className="crud-table__actions">
+                      <Link to={ROUTES.PLAYER_DETAILS.replace(':id', p.id)} className="btn btn-secondary" style={{ minHeight: '32px', padding: '0 12px', fontSize: '0.8125rem' }}>
+                        Détails
+                      </Link>
                       <button type="button" className="btn btn-secondary" style={{ minHeight: '32px', padding: '0 12px', fontSize: '0.8125rem' }} onClick={() => openEdit(p.id)}>
                         Modifier
                       </button>

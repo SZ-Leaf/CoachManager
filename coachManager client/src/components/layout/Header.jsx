@@ -65,45 +65,44 @@ const Header = ({ onMenuToggle, menuOpen }) => {
             <>
               {hasSidebar ? (
                 <div className="layout-header__user">
-                  <span className="layout-header__account" style={{ cursor: 'default', marginRight: '12px' }}>
+                  <span className="layout-header__account">
                     {user?.firstname}
                   </span>
                   <button
                     type="button"
-                    className="btn btn-secondary"
+                    className="btn btn-secondary btn-sm"
                     onClick={handleLogout}
-                    style={{ minHeight: '36px', padding: '0 12px', fontSize: '0.875rem' }}
                   >
                     Déconnexion
                   </button>
                 </div>
               ) : (
-                <>
-                  <Link to={ROUTES.DASHBOARD} className="btn btn-primary" style={{ minHeight: '40px' }}>
+                <div className="layout-header__user">
+                  <Link to={ROUTES.DASHBOARD} className="btn btn-primary btn-sm">
                     Espace coach
                   </Link>
                   <button
                     type="button"
-                    className="btn btn-ghost"
+                    className="btn btn-ghost btn-sm"
                     onClick={handleLogout}
                   >
                     Déconnexion
                   </button>
-                </>
+                </div>
               )}
             </>
           ) : (
-            <>
+            <div className="layout-header__user">
               <Link
                 to={ROUTES.LOGIN}
-                className="btn btn-ghost"
+                className="btn btn-ghost btn-sm"
               >
                 Connexion
               </Link>
-              <Link to={ROUTES.REGISTER} className="btn btn-primary">
+              <Link to={ROUTES.REGISTER} className="btn btn-primary btn-sm">
                 Essai gratuit
               </Link>
-            </>
+            </div>
           )}
         </div>
       </header>
