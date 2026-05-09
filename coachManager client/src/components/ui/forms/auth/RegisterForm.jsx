@@ -51,37 +51,39 @@ const RegisterForm = () => {
   };
 
   return (
-    <form className="app-form" onSubmit={handleSubmit}>
+    <form className="app-form auth-form" onSubmit={handleSubmit}>
       {error ? (
         <Alert variant="error" title="Erreur">
           {error}
         </Alert>
       ) : null}
 
-      <div>
-        <label htmlFor="firstname">Prénom</label>
-        <input
-          id="firstname"
-          type="text"
-          name="firstname"
-          value={formData.firstname}
-          onChange={handleChange}
-          required
-          minLength={3}
-        />
-      </div>
+      <div className="auth-form__row">
+        <div>
+          <label htmlFor="firstname">Prénom</label>
+          <input
+            id="firstname"
+            type="text"
+            name="firstname"
+            value={formData.firstname}
+            onChange={handleChange}
+            required
+            minLength={3}
+          />
+        </div>
 
-      <div>
-        <label htmlFor="lastname">Nom</label>
-        <input
-          id="lastname"
-          type="text"
-          name="lastname"
-          value={formData.lastname}
-          onChange={handleChange}
-          required
-          minLength={3}
-        />
+        <div>
+          <label htmlFor="lastname">Nom</label>
+          <input
+            id="lastname"
+            type="text"
+            name="lastname"
+            value={formData.lastname}
+            onChange={handleChange}
+            required
+            minLength={3}
+          />
+        </div>
       </div>
 
       <div>

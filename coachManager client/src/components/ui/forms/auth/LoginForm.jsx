@@ -33,7 +33,7 @@ const LoginForm = () => {
   };
 
   return (
-    <form className="app-form" onSubmit={handleSubmit}>
+    <form className="app-form auth-form" onSubmit={handleSubmit}>
       {error ? (
         <Alert variant="error" title="Erreur">
           {error}
