@@ -7,6 +7,7 @@ use App\Entity\User;
 use App\Enum\AttendanceStatus;
 use App\Repository\AttendanceRepository;
 use App\Repository\PlayerRepository;
+use App\Repository\TeamRepository;
 use Doctrine\ORM\EntityManagerInterface;
 
 class AttendanceService
@@ -15,6 +16,7 @@ class AttendanceService
         private readonly EntityManagerInterface $em,
         private readonly AttendanceRepository $attendanceRepository,
         private readonly PlayerRepository $playerRepository,
+        private readonly TeamRepository $teamRepository,
     ) {
     }
 
@@ -117,6 +119,138 @@ class AttendanceService
         }
         $this->em->remove($a);
         $this->em->flush();
+    }
+
+    /**
+     * État d'appel pour une séance donnée : tous les joueurs de l'équipe + statut enregistré le cas échéant.
+     *
+     * @return array{sessionAt: string, teamId: int, players: list<array<string, mixed>>}
+     */
+    public function getTeamRollCallForCoach(User $coach, int $teamId, string $sessionAtIso): array
+    {
+        $team = $this->teamRepository->findOneByIdAndCoach($teamId, $coach);
+        if ($team === null) {
+            throw new \InvalidArgumentException('Team not found', 404);
+        }
+        try {
+            $sessionAt = new \DateTimeImmutable($sessionAtIso);
+        } catch (\Exception) {
+            throw new \InvalidArgumentException('Invalid sessionAt', 400);
+        }
+
+        $players = $this->playerRepository->findAllByTeamIdAndCoach($teamId, $coach);
+        $attendances = $this->attendanceRepository->findByTeamAndSessionForCoach($teamId, $sessionAt, $coach);
+        $byPlayerId = [];
+        foreach ($attendances as $a) {
+            $pid = $a->getPlayer()?->getId();
+            if ($pid !== null) {
+                $byPlayerId[$pid] = $a;
+            }
+        }
+
+        $rows = [];
+        foreach ($players as $p) {
+            $a = $byPlayerId[$p->getId()] ?? null;
+            $rows[] = [
+                'playerId' => $p->getId(),
+                'firstname' => $p->getFirstname(),
+                'lastname' => $p->getLastname(),
+                'position' => $p->getPosition()?->value,
+                'status' => $a?->getStatus()?->value,
+                'attendanceId' => $a?->getId(),
+            ];
+        }
+
+        return [
+            'sessionAt' => $sessionAt->format(\DateTimeInterface::ATOM),
+            'teamId' => $teamId,
+            'players' => $rows,
+        ];
+    }
+
+    /**
+     * @param array{sessionAt: string, entries?: mixed} $data
+     *
+     * @return array{sessionAt: string, teamId: int, players: list<array<string, mixed>>}
+     */
+    public function saveTeamRollCall(User $coach, int $teamId, array $data): array
+    {
+        $team = $this->teamRepository->findOneByIdAndCoach($teamId, $coach);
+        if ($team === null) {
+            throw new \InvalidArgumentException('Team not found', 404);
+        }
+
+        $sessionAtIso = trim((string) ($data['sessionAt'] ?? ''));
+        if ($sessionAtIso === '') {
+            throw new \InvalidArgumentException('sessionAt is required', 400);
+        }
+        try {
+            $sessionAt = new \DateTimeImmutable($sessionAtIso);
+        } catch (\Exception) {
+            throw new \InvalidArgumentException('Invalid sessionAt', 400);
+        }
+
+        $entries = $data['entries'] ?? [];
+        if (!\is_array($entries)) {
+            throw new \InvalidArgumentException('entries must be an array', 400);
+        }
+
+        $players = $this->playerRepository->findAllByTeamIdAndCoach($teamId, $coach);
+        $allowedIds = [];
+        foreach ($players as $p) {
+            $allowedIds[$p->getId()] = true;
+        }
+
+        /** @var array<int, AttendanceStatus> $statusByPlayer */
+        $statusByPlayer = [];
+        foreach ($entries as $entry) {
+            if (!\is_array($entry)) {
+                throw new \InvalidArgumentException('Invalid entry', 400);
+            }
+            $playerId = (int) ($entry['playerId'] ?? 0);
+            $statusStr = isset($entry['status']) ? trim((string) $entry['status']) : '';
+            if ($playerId < 1 || !isset($allowedIds[$playerId])) {
+                throw new \InvalidArgumentException('Invalid player for this team', 400);
+            }
+            if ($statusStr === '') {
+                $statusByPlayer[$playerId] = AttendanceStatus::Absent;
+
+                continue;
+            }
+            try {
+                $statusByPlayer[$playerId] = AttendanceStatus::from($statusStr);
+            } catch (\ValueError $e) {
+                throw new \InvalidArgumentException('Invalid status value', 400);
+            }
+        }
+
+        $now = new \DateTimeImmutable();
+        foreach ($players as $player) {
+            $pid = $player->getId();
+            if ($pid === null) {
+                continue;
+            }
+            $status = $statusByPlayer[$pid] ?? AttendanceStatus::Absent;
+
+            $existing = $this->attendanceRepository->findOneByPlayerAndSessionForCoach($pid, $sessionAt, $coach);
+            if ($existing !== null) {
+                $existing->setStatus($status);
+                $existing->setUpdatedAt($now);
+            } else {
+                $a = new Attendance();
+                $a->setPlayer($player);
+                $a->setDate($sessionAt);
+                $a->setStatus($status);
+                $a->setComment(null);
+                $a->setCreatedAt($now);
+                $a->setUpdatedAt($now);
+                $this->em->persist($a);
+            }
+        }
+
+        $this->em->flush();
+
+        return $this->getTeamRollCallForCoach($coach, $teamId, $sessionAt->format(\DateTimeInterface::ATOM));
     }
 
     /**

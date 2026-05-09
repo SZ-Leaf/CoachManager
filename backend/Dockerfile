@@ -57,7 +57,10 @@ ENV APP_ENV=prod
 ENV APP_DEBUG=0
 
 # Finalize autoload + run Symfony scripts + fix permissions
-RUN composer dump-autoload --optimize --classmap-authoritative --no-dev \
+# Pas de --classmap-authoritative : avec compose, le code est monté depuis l’hôte
+# alors que vendor vient de l’image ; une classmap figée empêcherait de charger
+# toute nouvelle classe PHP sans reconstruire / sans regénérer l’autoload.
+RUN composer dump-autoload --optimize --no-dev \
     && composer run-script --no-dev post-install-cmd \
     && mkdir -p var/cache var/log \
     && chown -R www-data:www-data var

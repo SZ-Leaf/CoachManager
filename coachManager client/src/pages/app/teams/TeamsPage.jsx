@@ -127,6 +127,12 @@ export default function TeamsPage() {
                     <td data-label="Saison">{t.season || '—'}</td>
                     <td data-label="Club">{t.clubId ?? '—'}</td>
                     <td data-label="Actions" className="crud-table__actions">
+                      <Link
+                        to={ROUTES.TEAM_ROLL_CALL.replace(':id', t.id)}
+                        className="btn btn-primary btn-compact"
+                      >
+                        Appel
+                      </Link>
                       <Link to={ROUTES.TEAM_DETAILS.replace(':id', t.id)} className="btn btn-secondary btn-compact">
                         Détails
                       </Link>

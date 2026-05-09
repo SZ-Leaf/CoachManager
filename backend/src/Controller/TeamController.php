@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\User;
+use App\Services\Attendance\AttendanceService;
 use App\Services\Team\TeamCrudService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -62,6 +63,40 @@ final class TeamController extends AbstractController
             return $this->json(['item' => $teams->update($user, $id, $request->toArray())]);
         } catch (\InvalidArgumentException $e) {
             return $this->json(['message' => $e->getMessage()], $e->getCode() ?: Response::HTTP_BAD_REQUEST);
+        }
+    }
+
+    #[Route('/roll-call/{teamId}', name: 'roll_call_get', requirements: ['teamId' => '\d+'], methods: ['GET'])]
+    #[Route('/{teamId}/roll-call', name: 'roll_call_get_legacy', requirements: ['teamId' => '\d+'], methods: ['GET'])]
+    public function rollCallGet(int $teamId, Request $request, #[CurrentUser] ?User $user, AttendanceService $attendanceService): JsonResponse
+    {
+        if ($user === null) {
+            return $this->json(['message' => 'Unauthenticated'], Response::HTTP_UNAUTHORIZED);
+        }
+        $sessionAt = $request->query->get('sessionAt');
+        if (!\is_string($sessionAt) || $sessionAt === '') {
+            return $this->json(['message' => 'sessionAt query parameter is required'], Response::HTTP_BAD_REQUEST);
+        }
+        try {
+            return $this->json($attendanceService->getTeamRollCallForCoach($user, $teamId, $sessionAt));
+        } catch (\InvalidArgumentException $e) {
+            return $this->json(['message' => $e->getMessage()], $e->getCode() >= 400 && $e->getCode() < 600 ? $e->getCode() : Response::HTTP_BAD_REQUEST);
+        }
+    }
+
+    #[Route('/roll-call/{teamId}', name: 'roll_call_post', requirements: ['teamId' => '\d+'], methods: ['POST'])]
+    #[Route('/{teamId}/roll-call', name: 'roll_call_post_legacy', requirements: ['teamId' => '\d+'], methods: ['POST'])]
+    public function rollCallPost(int $teamId, Request $request, #[CurrentUser] ?User $user, AttendanceService $attendanceService): JsonResponse
+    {
+        if ($user === null) {
+            return $this->json(['message' => 'Unauthenticated'], Response::HTTP_UNAUTHORIZED);
+        }
+        try {
+            return $this->json($attendanceService->saveTeamRollCall($user, $teamId, $request->toArray()));
+        } catch (\InvalidArgumentException $e) {
+            return $this->json(['message' => $e->getMessage()], $e->getCode() >= 400 && $e->getCode() < 600 ? $e->getCode() : Response::HTTP_BAD_REQUEST);
+        } catch (\ValueError $e) {
+            return $this->json(['message' => 'Invalid status value'], Response::HTTP_BAD_REQUEST);
         }
     }
 

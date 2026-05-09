@@ -10,6 +10,7 @@ import PlayersPage from '../pages/app/players/PlayersPage.jsx';
 import PlayerDetailsPage from '../pages/app/players/PlayerDetailsPage.jsx';
 import TeamsPage from '../pages/app/teams/TeamsPage.jsx';
 import TeamDetailsPage from '../pages/app/teams/TeamDetailsPage.jsx';
+import TeamRollCallPage from '../pages/app/teams/TeamRollCallPage.jsx';
 import LoginPage from '../pages/auth/login/LoginPage.jsx';
 import RegisterPage from '../pages/auth/register/RegisterPage.jsx';
 import HomePage from '../pages/home/HomePage.jsx';
@@ -32,6 +33,7 @@ export function AppRoutes() {
           <Route path="/tableau-de-bord" element={<DashboardPage />} />
           <Route path="/club" element={<ClubPage />} />
           <Route path="/equipes" element={<TeamsPage />} />
+          <Route path="/equipes/:id/appel" element={<TeamRollCallPage />} />
           <Route path="/equipes/:id" element={<TeamDetailsPage />} />
           <Route path="/joueurs" element={<PlayersPage />} />
           <Route path="/joueurs/:id" element={<PlayerDetailsPage />} />

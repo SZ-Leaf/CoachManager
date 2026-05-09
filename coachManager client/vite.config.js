@@ -23,6 +23,21 @@ export default defineConfig(({ mode }) => {
         '/api': {
           target: backend,
           changeOrigin: true,
+          configure: (proxy) => {
+            proxy.on('proxyRes', (proxyRes, req) => {
+              const url = req.url ?? '';
+              if (
+                proxyRes.statusCode === 404 &&
+                url.includes('roll-call')
+              ) {
+                console.warn(
+                  `\n[vite] 404 sur ${url} — le backend sur ${backend} n’expose pas cette route (code obsolète ou mauvais projet). ` +
+                    'Depuis backend/: php bin/console cache:clear puis redémarre le serveur (ex. symfony server:stop && symfony server:start). ' +
+                    'Vérifie aussi VITE_PROXY_TARGET si Symfony n’est pas sur ce port.\n',
+                );
+              }
+            });
+          },
         },
         '/uploads': {
           target: backend,

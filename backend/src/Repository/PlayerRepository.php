@@ -22,10 +22,11 @@ class PlayerRepository extends ServiceEntityRepository
      */
     public function findAllByCoach(User $coach): array
     {
-        return $this->createQueryBuilder('player')
-            ->innerJoin('player.team', 'team')
-            ->andWhere('team.coach = :coach')
-            ->setParameter('coach', $coach)
+        $qb = $this->createQueryBuilder('player')
+            ->innerJoin('player.team', 'team');
+        CoachTeamAccessFilter::restrictToCoach($qb);
+
+        return $qb->setParameter('coach', $coach)
             ->orderBy('player.id', 'ASC')
             ->getQuery()
             ->getResult();
@@ -33,14 +34,33 @@ class PlayerRepository extends ServiceEntityRepository
 
     public function findOneByIdAndCoach(int $id, User $coach): ?Player
     {
-        return $this->createQueryBuilder('player')
+        $qb = $this->createQueryBuilder('player')
             ->innerJoin('player.team', 'team')
-            ->andWhere('player.id = :id')
-            ->andWhere('team.coach = :coach')
-            ->setParameter('id', $id)
+            ->andWhere('player.id = :id');
+        CoachTeamAccessFilter::restrictToCoach($qb);
+
+        return $qb->setParameter('id', $id)
             ->setParameter('coach', $coach)
             ->getQuery()
             ->getOneOrNullResult();
+    }
+
+    /**
+     * @return list<Player>
+     */
+    public function findAllByTeamIdAndCoach(int $teamId, User $coach): array
+    {
+        $qb = $this->createQueryBuilder('player')
+            ->innerJoin('player.team', 'team')
+            ->andWhere('team.id = :teamId');
+        CoachTeamAccessFilter::restrictToCoach($qb);
+
+        return $qb->setParameter('teamId', $teamId)
+            ->setParameter('coach', $coach)
+            ->orderBy('player.lastname', 'ASC')
+            ->addOrderBy('player.firstname', 'ASC')
+            ->getQuery()
+            ->getResult();
     }
 
     //    /**

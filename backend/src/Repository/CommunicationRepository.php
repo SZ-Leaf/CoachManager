@@ -22,11 +22,12 @@ class CommunicationRepository extends ServiceEntityRepository
      */
     public function findAllForCoach(User $coach): array
     {
-        return $this->createQueryBuilder('c')
+        $qb = $this->createQueryBuilder('c')
             ->innerJoin('c.player', 'pl')
-            ->innerJoin('pl.team', 'team')
-            ->andWhere('team.coach = :coach')
-            ->setParameter('coach', $coach)
+            ->innerJoin('pl.team', 'team');
+        CoachTeamAccessFilter::restrictToCoach($qb);
+
+        return $qb->setParameter('coach', $coach)
             ->orderBy('c.createdAt', 'DESC')
             ->getQuery()
             ->getResult();
@@ -34,12 +35,13 @@ class CommunicationRepository extends ServiceEntityRepository
 
     public function findOneByIdForCoach(int $id, User $coach): ?Communication
     {
-        return $this->createQueryBuilder('c')
+        $qb = $this->createQueryBuilder('c')
             ->innerJoin('c.player', 'pl')
             ->innerJoin('pl.team', 'team')
-            ->andWhere('c.id = :id')
-            ->andWhere('team.coach = :coach')
-            ->setParameter('id', $id)
+            ->andWhere('c.id = :id');
+        CoachTeamAccessFilter::restrictToCoach($qb);
+
+        return $qb->setParameter('id', $id)
             ->setParameter('coach', $coach)
             ->getQuery()
             ->getOneOrNullResult();

@@ -22,9 +22,10 @@ class TeamRepository extends ServiceEntityRepository
      */
     public function findAllByCoach(User $coach): array
     {
-        return $this->createQueryBuilder('team')
-            ->andWhere('team.coach = :coach')
-            ->setParameter('coach', $coach)
+        $qb = $this->createQueryBuilder('team');
+        CoachTeamAccessFilter::restrictToCoach($qb);
+
+        return $qb->setParameter('coach', $coach)
             ->orderBy('team.id', 'ASC')
             ->getQuery()
             ->getResult();
@@ -32,10 +33,11 @@ class TeamRepository extends ServiceEntityRepository
 
     public function findOneByIdAndCoach(int $id, User $coach): ?Team
     {
-        return $this->createQueryBuilder('team')
-            ->andWhere('team.id = :id')
-            ->andWhere('team.coach = :coach')
-            ->setParameter('id', $id)
+        $qb = $this->createQueryBuilder('team')
+            ->andWhere('team.id = :id');
+        CoachTeamAccessFilter::restrictToCoach($qb);
+
+        return $qb->setParameter('id', $id)
             ->setParameter('coach', $coach)
             ->getQuery()
             ->getOneOrNullResult();

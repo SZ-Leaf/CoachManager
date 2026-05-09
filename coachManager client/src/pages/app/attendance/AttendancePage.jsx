@@ -1,211 +1,74 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { Link } from 'react-router-dom';
 
-import Modal from '../../../components/ui/modals/Modal.jsx';
-import Alert from '../../../components/ui/feedback/Alert.jsx';
 import EmptyState from '../../../components/ui/feedback/EmptyState.jsx';
 import Spinner from '../../../components/ui/feedback/Spinner.jsx';
-import * as attendanceApi from '../../../services/attendanceService.js';
-import * as playerApi from '../../../services/playerService.js';
+import Alert from '../../../components/ui/feedback/Alert.jsx';
+import * as teamApi from '../../../services/teamService.js';
 import AppPage from '../AppPage.jsx';
-
-const STATUSES = [
-  { value: 'present', label: 'Présent' },
-  { value: 'absent', label: 'Absent' },
-  { value: 'late', label: 'Retard' },
-  { value: 'excused', label: 'Excusé' },
-];
-
-const empty = { playerId: '', date: '', status: '', comment: '' };
+import { ROUTES } from '../../../utils/routes.js';
+import '../../../styles/pages/attendance-hub.css';
 
 export default function AttendancePage() {
-  const qc = useQueryClient();
-  const [modalOpen, setModalOpen] = useState(false);
-  const [editingId, setEditingId] = useState(null);
-  const [form, setForm] = useState(empty);
-  const [formError, setFormError] = useState('');
-
-  const playersQuery = useQuery({
-    queryKey: ['players'],
-    queryFn: playerApi.fetchPlayers,
+  const teamsQuery = useQuery({
+    queryKey: ['teams'],
+    queryFn: teamApi.fetchTeams,
   });
 
-  const listQuery = useQuery({
-    queryKey: ['attendances'],
-    queryFn: attendanceApi.fetchAttendances,
-  });
-
-  const saveMutation = useMutation({
-    mutationFn: () => {
-      const body = {
-        playerId: Number(form.playerId),
-        date: form.date || null,
-        status: form.status || null,
-        comment: form.comment || null,
-      };
-      if (editingId) {
-        return attendanceApi.updateAttendance(editingId, body);
-      }
-      return attendanceApi.createAttendance(body);
-    },
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['attendances'] });
-      setModalOpen(false);
-      setEditingId(null);
-      setForm(empty);
-      setFormError('');
-    },
-    onError: (e) => setFormError(e.message),
-  });
-
-  const deleteMutation = useMutation({
-    mutationFn: (id) => attendanceApi.deleteAttendance(id),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['attendances'] }),
-  });
-
-  const openCreate = () => {
-    setEditingId(null);
-    setForm(empty);
-    setFormError('');
-    setModalOpen(true);
-  };
-
-  const openEdit = (row) => {
-    setEditingId(row.id);
-    setForm({
-      playerId: String(row.playerId ?? ''),
-      date: row.date ? String(row.date).slice(0, 10) : '',
-      status: row.status || '',
-      comment: row.comment || '',
-    });
-    setFormError('');
-    setModalOpen(true);
-  };
-
-  const rows = listQuery.data?.items ?? [];
-  const players = playersQuery.data?.items ?? [];
+  const teams = teamsQuery.data?.items ?? [];
 
   return (
-    <AppPage title="Présences" description="Feuilles de présence par joueur.">
-      <div className="crud-page">
-        <div className="crud-toolbar">
-          <button type="button" className="btn btn-primary" onClick={openCreate}>
-            + Nouvelle présence
-          </button>
-        </div>
-
-        {listQuery.isLoading ? <Spinner /> : null}
-        {listQuery.error ? (
-          <Alert variant="error">{listQuery.error.message}</Alert>
+    <AppPage
+      title="Appels / présences"
+      description="Les feuilles d’appel sont liées à une équipe. Choisissez une équipe pour enregistrer les présences à l’entraînement."
+    >
+      <div className="attendance-hub">
+        {teamsQuery.isLoading ? <Spinner /> : null}
+        {teamsQuery.error ? (
+          <Alert variant="error">{teamsQuery.error.message}</Alert>
         ) : null}
 
-        {!listQuery.isLoading && rows.length === 0 ? (
-          <EmptyState title="Aucune présence" />
+        {!teamsQuery.isLoading && teams.length === 0 ? (
+          <EmptyState
+            title="Aucune équipe"
+            description="Créez une équipe pour pouvoir faire l’appel."
+            action={
+              <Link to={ROUTES.TEAMS} className="btn btn-primary">
+                Gérer les équipes
+              </Link>
+            }
+          />
         ) : null}
 
-        {rows.length > 0 ? (
-          <div className="crud-table-wrap">
-            <table className="crud-table">
-              <thead>
-                <tr>
-                  <th>Joueur</th>
-                  <th>Date</th>
-                  <th>Statut</th>
-                  <th />
-                </tr>
-              </thead>
-              <tbody>
-                {rows.map((a) => (
-                  <tr key={a.id}>
-                    <td data-label="Joueur">{a.playerId}</td>
-                    <td data-label="Date">{a.date ? String(a.date).slice(0, 10) : '—'}</td>
-                    <td data-label="Statut">{a.status || '—'}</td>
-                    <td data-label="Actions" className="crud-table__actions">
-                      <button type="button" className="btn btn-secondary btn-compact" onClick={() => openEdit(a)}>
-                        Modifier
-                      </button>
-                      <button
-                        type="button"
-                        className="btn btn-danger btn-compact"
-                        onClick={() => {
-                          if (window.confirm('Supprimer ?')) {
-                            deleteMutation.mutate(a.id);
-                          }
-                        }}
-                      >
-                        Supprimer
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+        {teams.length > 0 ? (
+          <ul className="attendance-hub__list">
+            {teams.map((t) => (
+              <li key={t.id} className="attendance-hub__card">
+                <div className="attendance-hub__card-main">
+                  <h2 className="attendance-hub__team-name">{t.name}</h2>
+                  <p className="attendance-hub__team-meta">
+                    {[t.category, t.season].filter(Boolean).join(' · ') || 'Équipe'}
+                  </p>
+                </div>
+                <div className="attendance-hub__card-actions">
+                  <Link
+                    to={ROUTES.TEAM_ROLL_CALL.replace(':id', String(t.id))}
+                    className="btn btn-primary"
+                  >
+                    Faire l’appel
+                  </Link>
+                  <Link
+                    to={ROUTES.TEAM_DETAILS.replace(':id', String(t.id))}
+                    className="btn btn-secondary btn-sm"
+                  >
+                    Détails
+                  </Link>
+                </div>
+              </li>
+            ))}
+          </ul>
         ) : null}
       </div>
-
-      <Modal
-        isOpen={modalOpen}
-        onClose={() => setModalOpen(false)}
-        title={editingId ? 'Modifier' : 'Nouvelle présence'}
-      >
-        <form
-          className="app-form"
-          onSubmit={(e) => {
-            e.preventDefault();
-            saveMutation.mutate();
-          }}
-        >
-          {formError ? <Alert variant="error">{formError}</Alert> : null}
-          <div>
-            <label>Joueur *</label>
-            <select
-              value={form.playerId}
-              onChange={(e) => setForm({ ...form, playerId: e.target.value })}
-              required
-            >
-              <option value="">—</option>
-              {players.map((p) => (
-                <option key={p.id} value={p.id}>
-                  {p.firstname} {p.lastname}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <label>Date</label>
-            <input
-              type="datetime-local"
-              value={form.date}
-              onChange={(e) => setForm({ ...form, date: e.target.value })}
-            />
-          </div>
-          <div>
-            <label>Statut</label>
-            <select
-              value={form.status}
-              onChange={(e) => setForm({ ...form, status: e.target.value })}
-            >
-              <option value="">—</option>
-              {STATUSES.map((s) => (
-                <option key={s.value} value={s.value}>
-                  {s.label}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <label>Commentaire</label>
-            <input
-              value={form.comment}
-              onChange={(e) => setForm({ ...form, comment: e.target.value })}
-            />
-          </div>
-          <button type="submit" className="btn btn-primary" disabled={saveMutation.isPending}>
-            Enregistrer
-          </button>
-        </form>
-      </Modal>
     </AppPage>
   );
 }

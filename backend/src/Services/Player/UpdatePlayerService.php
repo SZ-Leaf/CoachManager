@@ -7,6 +7,7 @@ use App\Entity\User;
 use App\Enum\PlayerPosition;
 use App\Enum\PlayerStatus;
 use App\Exceptions\Player\UpdatePlayerException;
+use App\Repository\CoachTeamAccessFilter;
 use App\Repository\PlayerRepository;
 use App\Repository\TeamRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -107,7 +108,7 @@ class UpdatePlayerService
             if ($team === null) {
                 throw UpdatePlayerException::teamNotFound();
             }
-            if ($team->getCoach()?->getId() !== $coach->getId()) {
+            if (!CoachTeamAccessFilter::coachHasTeamAccess($team, $coach)) {
                 throw UpdatePlayerException::teamForbidden();
             }
 

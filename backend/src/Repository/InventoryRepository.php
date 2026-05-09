@@ -22,10 +22,11 @@ class InventoryRepository extends ServiceEntityRepository
      */
     public function findAllForCoach(User $coach): array
     {
-        return $this->createQueryBuilder('inv')
-            ->innerJoin('inv.team', 'team')
-            ->andWhere('team.coach = :coach')
-            ->setParameter('coach', $coach)
+        $qb = $this->createQueryBuilder('inv')
+            ->innerJoin('inv.team', 'team');
+        CoachTeamAccessFilter::restrictToCoach($qb);
+
+        return $qb->setParameter('coach', $coach)
             ->orderBy('inv.id', 'ASC')
             ->getQuery()
             ->getResult();
@@ -33,11 +34,12 @@ class InventoryRepository extends ServiceEntityRepository
 
     public function findOneByIdForCoach(int $id, User $coach): ?Inventory
     {
-        return $this->createQueryBuilder('inv')
+        $qb = $this->createQueryBuilder('inv')
             ->innerJoin('inv.team', 'team')
-            ->andWhere('inv.id = :id')
-            ->andWhere('team.coach = :coach')
-            ->setParameter('id', $id)
+            ->andWhere('inv.id = :id');
+        CoachTeamAccessFilter::restrictToCoach($qb);
+
+        return $qb->setParameter('id', $id)
             ->setParameter('coach', $coach)
             ->getQuery()
             ->getOneOrNullResult();

@@ -22,11 +22,12 @@ class ItemListRepository extends ServiceEntityRepository
      */
     public function findAllForCoach(User $coach): array
     {
-        return $this->createQueryBuilder('il')
+        $qb = $this->createQueryBuilder('il')
             ->innerJoin('il.inventory', 'inv')
-            ->innerJoin('inv.team', 'team')
-            ->andWhere('team.coach = :coach')
-            ->setParameter('coach', $coach)
+            ->innerJoin('inv.team', 'team');
+        CoachTeamAccessFilter::restrictToCoach($qb);
+
+        return $qb->setParameter('coach', $coach)
             ->orderBy('il.id', 'ASC')
             ->getQuery()
             ->getResult();
@@ -34,12 +35,13 @@ class ItemListRepository extends ServiceEntityRepository
 
     public function findOneByIdForCoach(int $id, User $coach): ?ItemList
     {
-        return $this->createQueryBuilder('il')
+        $qb = $this->createQueryBuilder('il')
             ->innerJoin('il.inventory', 'inv')
             ->innerJoin('inv.team', 'team')
-            ->andWhere('il.id = :id')
-            ->andWhere('team.coach = :coach')
-            ->setParameter('id', $id)
+            ->andWhere('il.id = :id');
+        CoachTeamAccessFilter::restrictToCoach($qb);
+
+        return $qb->setParameter('id', $id)
             ->setParameter('coach', $coach)
             ->getQuery()
             ->getOneOrNullResult();

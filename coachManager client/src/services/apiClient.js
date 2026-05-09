@@ -21,7 +21,10 @@ export function buildApiUrl(path) {
 export async function apiRequest(path, options = {}) {
   const { body, headers: hdr = {}, ...rest } = options;
   /** @type {HeadersInit} */
-  const headers = { ...hdr };
+  const headers = {
+    Accept: 'application/json',
+    ...hdr,
+  };
 
   /** @type {RequestInit} */
   const init = {
@@ -46,7 +49,25 @@ export async function apiRequest(path, options = {}) {
   }
 
   const text = await res.text();
-  const data = text ? JSON.parse(text) : null;
+
+  /** @returns {any} */
+  const parseJson = () => {
+    if (!text) return null;
+    try {
+      return JSON.parse(text);
+    } catch {
+      const preview = text.trim().replace(/\s+/g, ' ').slice(0, 200);
+      const hint =
+        preview.startsWith('<') || preview.startsWith('<!DOCTYPE')
+          ? ' (réponse HTML : vérifiez que le backend tourne, l’URL API/proxy Vite, ou reconnectez-vous.)'
+          : '';
+      throw new Error(
+        `Réponse du serveur non JSON (${res.status}). ${preview}${hint}`,
+      );
+    }
+  };
+
+  const data = parseJson();
 
   if (!res.ok) {
     const err = new Error(data?.message || res.statusText || 'Request failed');

@@ -7,6 +7,7 @@ export const ROUTES = {
   TEAMS: '/equipes',
   PLAYERS: '/joueurs',
   ATTENDANCE: '/presences',
+  TEAM_ROLL_CALL: '/equipes/:id/appel',
   INVENTORY: '/inventaire',
   MESSAGES: '/messages',
   TEAM_DETAILS: '/equipes/:id',

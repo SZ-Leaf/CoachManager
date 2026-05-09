@@ -22,12 +22,13 @@ class ProductRepository extends ServiceEntityRepository
      */
     public function findAllForCoach(User $coach): array
     {
-        return $this->createQueryBuilder('p')
+        $qb = $this->createQueryBuilder('p')
             ->innerJoin('p.itemList', 'il')
             ->innerJoin('il.inventory', 'inv')
-            ->innerJoin('inv.team', 'team')
-            ->andWhere('team.coach = :coach')
-            ->setParameter('coach', $coach)
+            ->innerJoin('inv.team', 'team');
+        CoachTeamAccessFilter::restrictToCoach($qb);
+
+        return $qb->setParameter('coach', $coach)
             ->orderBy('p.id', 'ASC')
             ->getQuery()
             ->getResult();
@@ -35,13 +36,14 @@ class ProductRepository extends ServiceEntityRepository
 
     public function findOneByIdForCoach(int $id, User $coach): ?Product
     {
-        return $this->createQueryBuilder('p')
+        $qb = $this->createQueryBuilder('p')
             ->innerJoin('p.itemList', 'il')
             ->innerJoin('il.inventory', 'inv')
             ->innerJoin('inv.team', 'team')
-            ->andWhere('p.id = :id')
-            ->andWhere('team.coach = :coach')
-            ->setParameter('id', $id)
+            ->andWhere('p.id = :id');
+        CoachTeamAccessFilter::restrictToCoach($qb);
+
+        return $qb->setParameter('id', $id)
             ->setParameter('coach', $coach)
             ->getQuery()
             ->getOneOrNullResult();

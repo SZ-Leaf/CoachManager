@@ -35,9 +35,17 @@ const TeamDetailsPage = () => {
       title={`Équipe : ${team.name}`}
       description={`${team.category || 'Sans catégorie'} — Saison ${team.season || 'N/A'}`}
       action={
-        <Link to={ROUTES.TEAMS} className="btn btn-secondary">
-          Retour aux équipes
-        </Link>
+        <div className="app-page__actions-row">
+          <Link
+            to={ROUTES.TEAM_ROLL_CALL.replace(':id', id)}
+            className="btn btn-primary"
+          >
+            Faire l’appel
+          </Link>
+          <Link to={ROUTES.TEAMS} className="btn btn-secondary">
+            Retour aux équipes
+          </Link>
+        </div>
       }
     >
       <div className="crud-page">

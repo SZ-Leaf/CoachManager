@@ -8,6 +8,7 @@ use App\Entity\User;
 use App\Enum\PlayerPosition;
 use App\Enum\PlayerStatus;
 use App\Exceptions\Player\CreatePlayerException;
+use App\Repository\CoachTeamAccessFilter;
 use App\Repository\TeamRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
@@ -39,7 +40,7 @@ class CreatePlayerService
         if ($team === null) {
             throw CreatePlayerException::teamNotFound();
         }
-        if ($team->getCoach()?->getId() !== $coach->getId()) {
+        if (!CoachTeamAccessFilter::coachHasTeamAccess($team, $coach)) {
             throw CreatePlayerException::teamForbidden();
         }
 
