@@ -107,7 +107,7 @@ const RegisterForm = () => {
           required
           minLength={8}
         />
-        <small style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '4px' }}>
+        <small className="app-form__hint">
           Au moins 8 caractères, une majuscule et un chiffre.
         </small>
       </div>

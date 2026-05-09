@@ -9,8 +9,7 @@ import * as listApi from '../../../services/listService.js';
 import * as productApi from '../../../services/productService.js';
 import * as teamApi from '../../../services/teamService.js';
 import AppPage from '../AppPage.jsx';
-
-import '../teams/teams.css';
+import './InventoryPage.css';
 
 export default function InventoryPage() {
   const qc = useQueryClient();
@@ -190,16 +189,14 @@ export default function InventoryPage() {
                 <li key={l.id}>
                   <button
                     type="button"
-                    className={`btn btn-secondary ${Number(listId) === l.id ? 'is-active' : ''}`}
-                    style={{ flex: 1, justifyContent: 'flex-start', minHeight: '40px' }}
+                    className={`btn btn-secondary inventory-pill-list__select ${Number(listId) === l.id ? 'is-active' : ''}`}
                     onClick={() => setListId(String(l.id))}
                   >
                     {l.name}
                   </button>
                   <button
                     type="button"
-                    className="btn btn-danger"
-                    style={{ minWidth: '40px', padding: 0 }}
+                    className="btn btn-danger inventory-pill-list__remove"
                     onClick={() => {
                       if (window.confirm('Supprimer cette liste ?')) {
                         deleteList.mutate(l.id);
@@ -256,8 +253,7 @@ export default function InventoryPage() {
                       <td data-label="Actions" className="crud-table__actions">
                         <button
                           type="button"
-                          className="btn btn-danger"
-                          style={{ minHeight: '32px', padding: '0 12px', fontSize: '0.8125rem' }}
+                          className="btn btn-danger btn-compact"
                           onClick={() => {
                             if (window.confirm('Supprimer ce produit ?')) {
                               deleteProduct.mutate(p.id);

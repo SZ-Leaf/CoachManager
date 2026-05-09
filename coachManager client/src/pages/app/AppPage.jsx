@@ -1,3 +1,5 @@
+import './AppPage.css';
+
 const AppPage = ({ title, description, action, children }) => (
   <div className="app-page">
     <header className="app-page__header">

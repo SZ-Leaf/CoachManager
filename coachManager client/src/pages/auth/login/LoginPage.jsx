@@ -4,7 +4,7 @@ import { Link, useLocation } from 'react-router-dom';
 import Alert from '../../../components/ui/feedback/Alert.jsx';
 import LoginForm from '../../../components/ui/forms/auth/LoginForm.jsx';
 import { ROUTES } from '../../../utils/routes.js';
-import './login.css';
+import '../AuthPages.css';
 
 const LoginPage = () => {
   const location = useLocation();

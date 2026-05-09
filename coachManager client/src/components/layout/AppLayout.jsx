@@ -3,8 +3,7 @@ import { Outlet } from 'react-router-dom';
 import Header from './Header.jsx';
 import Sidebar from './Sidebar.jsx';
 import Footer from './Footer.jsx';
-import './layout.css';
-
+import './AppLayout.css';
 const AppLayout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 

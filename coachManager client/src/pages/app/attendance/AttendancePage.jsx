@@ -9,8 +9,6 @@ import * as attendanceApi from '../../../services/attendanceService.js';
 import * as playerApi from '../../../services/playerService.js';
 import AppPage from '../AppPage.jsx';
 
-import '../teams/teams.css';
-
 const STATUSES = [
   { value: 'present', label: 'Présent' },
   { value: 'absent', label: 'Absent' },
@@ -123,13 +121,12 @@ export default function AttendancePage() {
                     <td data-label="Date">{a.date ? String(a.date).slice(0, 10) : '—'}</td>
                     <td data-label="Statut">{a.status || '—'}</td>
                     <td data-label="Actions" className="crud-table__actions">
-                      <button type="button" className="btn btn-secondary" style={{ minHeight: '32px', padding: '0 12px', fontSize: '0.8125rem' }} onClick={() => openEdit(a)}>
+                      <button type="button" className="btn btn-secondary btn-compact" onClick={() => openEdit(a)}>
                         Modifier
                       </button>
                       <button
                         type="button"
-                        className="btn btn-danger"
-                        style={{ minHeight: '32px', padding: '0 12px', fontSize: '0.8125rem' }}
+                        className="btn btn-danger btn-compact"
                         onClick={() => {
                           if (window.confirm('Supprimer ?')) {
                             deleteMutation.mutate(a.id);

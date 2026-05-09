@@ -1,0 +1,108 @@
+/* Drawer + overlay — partagé header (accueil) et sidebar (app) */
+.layout-sidebar-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgb(15 23 42 / 0.45);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity var(--transition-base), visibility var(--transition-base);
+  z-index: calc(var(--z-drawer) - 1);
+}
+
+.layout-sidebar-backdrop.is-open {
+  opacity: 1;
+  visibility: visible;
+}
+
+.layout-sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: var(--sidebar-width);
+  max-width: 100%;
+  background: var(--color-bg-elevated);
+  border-right: 1px solid var(--color-border);
+  box-shadow: var(--shadow-lg);
+  transform: translateX(-100%);
+  transition: transform var(--transition-base);
+  z-index: var(--z-drawer);
+  padding: calc(var(--header-height) + var(--space-4)) var(--space-4) var(--space-6);
+  overflow-y: auto;
+}
+
+.layout-sidebar.is-open {
+  transform: translateX(0);
+}
+
+.layout-sidebar nav ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.layout-sidebar nav a {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-3);
+  border-radius: var(--radius-md);
+  color: var(--color-text-secondary);
+  font-weight: 600;
+  font-size: var(--text-sm);
+  text-decoration: none;
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.layout-sidebar nav a:hover {
+  background: var(--color-bg);
+  color: var(--color-text);
+}
+
+.layout-sidebar nav a.is-active {
+  background: var(--color-primary-muted);
+  color: var(--color-primary-hover);
+}
+
+.layout-sidebar nav svg {
+  flex-shrink: 0;
+  opacity: 0.85;
+}
+
+/* Navigation publique (accueil) : même tiroir, moins d’icônes */
+.layout-sidebar--public nav a {
+  padding: var(--space-4) var(--space-3);
+  font-size: var(--text-base);
+}
+
+@media (min-width: 768px) {
+  .layout-sidebar-backdrop {
+    display: none;
+  }
+
+  .layout-sidebar:not(.layout-sidebar--public) {
+    position: sticky;
+    top: var(--header-height);
+    left: auto;
+    transform: none;
+    height: calc(100dvh - var(--header-height));
+    width: 15.5rem;
+    max-width: none;
+    padding: var(--space-4);
+    box-shadow: none;
+    border-right: 1px solid var(--color-border);
+    flex-shrink: 0;
+  }
+
+  .layout-sidebar:not(.layout-sidebar--public).is-open {
+    transform: none;
+  }
+
+  .layout-sidebar--public {
+    /* Sur desktop l’accueil utilise la barre horizontale */
+    display: none;
+  }
+}

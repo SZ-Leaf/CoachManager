@@ -9,8 +9,6 @@ import * as messagesApi from '../../../services/messagesService.js';
 import * as playerApi from '../../../services/playerService.js';
 import AppPage from '../AppPage.jsx';
 
-import '../teams/teams.css';
-
 const empty = {
   playerId: '',
   recipientType: 'player',
@@ -127,13 +125,12 @@ export default function MessagesPage() {
                     <td data-label="Sujet">{m.subject || '—'}</td>
                     <td data-label="Statut">{m.status || '—'}</td>
                     <td data-label="Actions" className="crud-table__actions">
-                      <button type="button" className="btn btn-secondary" style={{ minHeight: '32px', padding: '0 12px', fontSize: '0.8125rem' }} onClick={() => openEdit(m)}>
+                      <button type="button" className="btn btn-secondary btn-compact" onClick={() => openEdit(m)}>
                         Modifier
                       </button>
                       <button
                         type="button"
-                        className="btn btn-danger"
-                        style={{ minHeight: '32px', padding: '0 12px', fontSize: '0.8125rem' }}
+                        className="btn btn-danger btn-compact"
                         onClick={() => {
                           if (window.confirm('Supprimer ?')) {
                             deleteMutation.mutate(m.id);

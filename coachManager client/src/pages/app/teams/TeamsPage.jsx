@@ -11,8 +11,6 @@ import AppPage from '../AppPage.jsx';
 import { Link } from 'react-router-dom';
 import { ROUTES } from '../../../utils/routes.js';
 
-import './teams.css';
-
 const emptyForm = { name: '', category: '', season: '', clubId: '' };
 
 export default function TeamsPage() {
@@ -121,7 +119,7 @@ export default function TeamsPage() {
                 {teams.map((t) => (
                   <tr key={t.id}>
                     <td data-label="Nom">
-                      <Link to={ROUTES.TEAM_DETAILS.replace(':id', t.id)} style={{ color: 'var(--primary)', fontWeight: '600' }}>
+                      <Link to={ROUTES.TEAM_DETAILS.replace(':id', t.id)} className="table-link">
                         {t.name}
                       </Link>
                     </td>
@@ -129,16 +127,15 @@ export default function TeamsPage() {
                     <td data-label="Saison">{t.season || '—'}</td>
                     <td data-label="Club">{t.clubId ?? '—'}</td>
                     <td data-label="Actions" className="crud-table__actions">
-                      <Link to={ROUTES.TEAM_DETAILS.replace(':id', t.id)} className="btn btn-secondary" style={{ minHeight: '32px', padding: '0 12px', fontSize: '0.8125rem' }}>
+                      <Link to={ROUTES.TEAM_DETAILS.replace(':id', t.id)} className="btn btn-secondary btn-compact">
                         Détails
                       </Link>
-                      <button type="button" className="btn btn-secondary" style={{ minHeight: '32px', padding: '0 12px', fontSize: '0.8125rem' }} onClick={() => openEdit(t)}>
+                      <button type="button" className="btn btn-secondary btn-compact" onClick={() => openEdit(t)}>
                         Modifier
                       </button>
                       <button
                         type="button"
-                        className="btn btn-danger"
-                        style={{ minHeight: '32px', padding: '0 12px', fontSize: '0.8125rem' }}
+                        className="btn btn-danger btn-compact"
                         onClick={() => {
                           if (window.confirm('Supprimer cette équipe ?')) {
                             deleteMutation.mutate(t.id);

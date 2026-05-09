@@ -12,8 +12,6 @@ import AppPage from '../AppPage.jsx';
 import { Link } from 'react-router-dom';
 import { ROUTES } from '../../../utils/routes.js';
 
-import '../teams/teams.css';
-
 function birthdayInputValue(iso) {
   if (!iso) return '';
   return String(iso).slice(0, 10);
@@ -138,23 +136,22 @@ export default function PlayersPage() {
                 {players.map((p) => (
                   <tr key={p.id}>
                     <td data-label="Nom">
-                      <Link to={ROUTES.PLAYER_DETAILS.replace(':id', p.id)} style={{ color: 'var(--primary)', fontWeight: '600' }}>
+                      <Link to={ROUTES.PLAYER_DETAILS.replace(':id', p.id)} className="table-link">
                         {p.firstname} {p.lastname}
                       </Link>
                     </td>
                     <td data-label="Équipe">{p.teamId ?? '—'}</td>
                     <td data-label="Poste">{p.position || '—'}</td>
                     <td data-label="Actions" className="crud-table__actions">
-                      <Link to={ROUTES.PLAYER_DETAILS.replace(':id', p.id)} className="btn btn-secondary" style={{ minHeight: '32px', padding: '0 12px', fontSize: '0.8125rem' }}>
+                      <Link to={ROUTES.PLAYER_DETAILS.replace(':id', p.id)} className="btn btn-secondary btn-compact">
                         Détails
                       </Link>
-                      <button type="button" className="btn btn-secondary" style={{ minHeight: '32px', padding: '0 12px', fontSize: '0.8125rem' }} onClick={() => openEdit(p.id)}>
+                      <button type="button" className="btn btn-secondary btn-compact" onClick={() => openEdit(p.id)}>
                         Modifier
                       </button>
                       <button
                         type="button"
-                        className="btn btn-danger"
-                        style={{ minHeight: '32px', padding: '0 12px', fontSize: '0.8125rem' }}
+                        className="btn btn-danger btn-compact"
                         onClick={() => {
                           if (window.confirm('Supprimer ce joueur ?')) {
                             deleteMutation.mutate(p.id);

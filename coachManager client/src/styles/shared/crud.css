@@ -1,0 +1,183 @@
+/* Pages liste / édition — barre d’actions + table responsive */
+.crud-page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.crud-toolbar {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--space-3);
+}
+
+.crud-toolbar .btn {
+  width: 100%;
+}
+
+.crud-toolbar select,
+.crud-toolbar input {
+  width: 100%;
+  min-height: 2.75rem;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-elevated);
+  font-size: var(--text-base);
+}
+
+.crud-toolbar select:focus-visible,
+.crud-toolbar input:focus-visible {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px var(--color-primary-muted);
+  outline: none;
+}
+
+@media (min-width: 640px) {
+  .crud-toolbar {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .crud-toolbar .btn {
+    width: auto;
+  }
+
+  .crud-toolbar select,
+  .crud-toolbar input {
+    width: auto;
+    min-width: 12rem;
+    flex: 1 1 auto;
+  }
+}
+
+.crud-table-wrap {
+  width: 100%;
+  overflow-x: auto;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border);
+  background: var(--color-bg-elevated);
+  box-shadow: var(--shadow-sm);
+  -webkit-overflow-scrolling: touch;
+}
+
+.crud-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--text-sm);
+}
+
+.crud-table thead {
+  background: var(--color-bg-muted);
+}
+
+.crud-table th {
+  text-align: left;
+  padding: var(--space-3) var(--space-4);
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.crud-table td {
+  padding: var(--space-3) var(--space-4);
+  vertical-align: middle;
+  border-bottom: 1px solid var(--color-border);
+  color: var(--color-text);
+}
+
+.crud-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.crud-table tbody tr:hover {
+  background: color-mix(in srgb, var(--color-bg) 60%, var(--color-bg-elevated));
+}
+
+.crud-table__actions {
+  white-space: nowrap;
+}
+
+.crud-table__actions .btn {
+  margin-right: var(--space-2);
+  margin-bottom: var(--space-2);
+}
+
+.crud-table__actions .btn:last-child {
+  margin-right: 0;
+}
+
+/* Cartes empilées sur mobile (pattern data-label déjà présent dans le JSX) */
+@media (max-width: 767px) {
+  .crud-table thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    border: 0;
+  }
+
+  .crud-table,
+  .crud-table tbody,
+  .crud-table tr,
+  .crud-table td {
+    display: block;
+    width: 100%;
+  }
+
+  .crud-table tbody tr {
+    margin-bottom: var(--space-3);
+    padding: var(--space-3);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    background: var(--color-bg-elevated);
+    box-shadow: var(--shadow-xs);
+  }
+
+  .crud-table tbody tr:hover {
+    background: var(--color-bg-elevated);
+  }
+
+  .crud-table td {
+    display: grid;
+    grid-template-columns: minmax(5.5rem, 36%) 1fr;
+    gap: var(--space-2) var(--space-3);
+    padding: var(--space-2) 0;
+    border: none;
+    align-items: start;
+    text-align: left;
+  }
+
+  .crud-table td::before {
+    content: attr(data-label);
+    font-weight: 600;
+    font-size: var(--text-xs);
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .crud-table__actions {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    padding-top: var(--space-3);
+    border-top: 1px dashed var(--color-border);
+    margin-top: var(--space-2);
+  }
+
+  .crud-table__actions::before {
+    content: none !important;
+  }
+
+  .crud-table__actions .btn {
+    width: 100%;
+    margin: 0;
+  }
+}

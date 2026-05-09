@@ -4,6 +4,8 @@ import { Link, NavLink } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { ROUTES } from '../../utils/routes.js';
 import { LAYOUT_NAV_LINKS } from './navigation.js';
+import './Header.css';
+import './navigation-drawer.css';
 
 const Header = ({ onMenuToggle, menuOpen }) => {
   const { user, logout } = useAuth();

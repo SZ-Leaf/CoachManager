@@ -8,8 +8,6 @@ import Spinner from '../../../components/ui/feedback/Spinner.jsx';
 import * as clubApi from '../../../services/clubService.js';
 import AppPage from '../AppPage.jsx';
 
-import '../teams/teams.css';
-
 const DISCIPLINES = [
   'football',
   'basketball',
@@ -123,13 +121,12 @@ export default function ClubPage() {
                     <td data-label="Nom">{c.name}</td>
                     <td data-label="Discipline">{c.discipline || '—'}</td>
                     <td data-label="Actions" className="crud-table__actions">
-                      <button type="button" className="btn btn-secondary" style={{ minHeight: '32px', padding: '0 12px', fontSize: '0.8125rem' }} onClick={() => openEdit(c)}>
+                      <button type="button" className="btn btn-secondary btn-compact" onClick={() => openEdit(c)}>
                         Modifier
                       </button>
                       <button
                         type="button"
-                        className="btn btn-danger"
-                        style={{ minHeight: '32px', padding: '0 12px', fontSize: '0.8125rem' }}
+                        className="btn btn-danger btn-compact"
                         onClick={() => {
                           if (window.confirm('Supprimer ce club ?')) {
                             deleteMutation.mutate(c.id);

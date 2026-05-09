@@ -1,10 +1,9 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
+import './App.css';
 import { AuthProvider, useAuth } from './context/AuthContext.jsx';
 import { AppRoutes } from './routes/AppRoutes.jsx';
 import Spinner from './components/ui/feedback/Spinner.jsx';
-
-import './App.css';
 
 const queryClient = new QueryClient({
   defaultOptions: {

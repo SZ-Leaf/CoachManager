@@ -7,6 +7,7 @@ import Spinner from '../../../components/ui/feedback/Spinner.jsx';
 import Alert from '../../../components/ui/feedback/Alert.jsx';
 import EmptyState from '../../../components/ui/feedback/EmptyState.jsx';
 import { ROUTES } from '../../../utils/routes.js';
+import './TeamDetailsPage.css';
 
 const TeamDetailsPage = () => {
   const { id } = useParams();
@@ -41,7 +42,7 @@ const TeamDetailsPage = () => {
     >
       <div className="crud-page">
         <section className="app-page__content">
-          <h3 style={{ marginBottom: '16px' }}>Joueurs de l'équipe</h3>
+          <h3 className="team-details__roster-title">Joueurs de l'équipe</h3>
           
           {teamPlayers.length === 0 ? (
             <EmptyState title="Aucun joueur" description="Il n'y a pas encore de joueurs rattachés à cette équipe." />
@@ -60,14 +61,14 @@ const TeamDetailsPage = () => {
                   {teamPlayers.map((p) => (
                     <tr key={p.id}>
                       <td data-label="Nom">
-                        <Link to={ROUTES.PLAYER_DETAILS.replace(':id', p.id)} style={{ color: 'var(--primary)', fontWeight: '600' }}>
+                        <Link to={ROUTES.PLAYER_DETAILS.replace(':id', p.id)} className="table-link">
                           {p.firstname} {p.lastname}
                         </Link>
                       </td>
                       <td data-label="Poste">{p.position || '—'}</td>
                       <td data-label="Statut">{p.status || '—'}</td>
                       <td data-label="Actions" className="crud-table__actions">
-                        <Link to={ROUTES.PLAYER_DETAILS.replace(':id', p.id)} className="btn btn-secondary" style={{ minHeight: '32px', padding: '0 12px', fontSize: '0.8125rem' }}>
+                        <Link to={ROUTES.PLAYER_DETAILS.replace(':id', p.id)} className="btn btn-secondary btn-compact">
                           Voir fiche
                         </Link>
                       </td>

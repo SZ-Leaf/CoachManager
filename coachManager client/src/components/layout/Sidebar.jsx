@@ -1,5 +1,6 @@
 import { NavLink } from 'react-router-dom';
 import { LAYOUT_NAV_LINKS } from './navigation.js';
+import './navigation-drawer.css';
 
 const Sidebar = ({ open, onNavigate }) => {
   return (

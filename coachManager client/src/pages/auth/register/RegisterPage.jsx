@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 
 import RegisterForm from '../../../components/ui/forms/auth/RegisterForm.jsx';
 import { ROUTES } from '../../../utils/routes.js';
-import './register.css';
+import '../AuthPages.css';
 
 const RegisterPage = () => {
   return (

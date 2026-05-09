@@ -1,0 +1,75 @@
+/* Inventaire — sections empilées, listes de pilules tactiles */
+.inventory-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border-radius: var(--radius-lg);
+  background: var(--color-bg-elevated);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-xs);
+}
+
+.inventory-section h2 {
+  margin: 0;
+  font-size: var(--text-md);
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.inventory-section select {
+  width: 100%;
+  min-height: 2.75rem;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-elevated);
+  font-size: var(--text-base);
+}
+
+.inventory-section select:focus-visible {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px var(--color-primary-muted);
+}
+
+.inventory-pill-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.inventory-pill-list li {
+  display: flex;
+  align-items: stretch;
+  gap: var(--space-2);
+}
+
+.inventory-pill-list .btn {
+  min-height: 2.75rem;
+}
+
+.inventory-pill-list__select {
+  flex: 1;
+  justify-content: flex-start;
+  text-align: left;
+}
+
+.inventory-pill-list__remove {
+  min-width: 2.5rem;
+  padding: 0;
+  flex-shrink: 0;
+}
+
+.inventory-qty-input {
+  max-width: 6rem;
+}
+
+@media (min-width: 640px) {
+  .inventory-section select {
+    max-width: 28rem;
+  }
+}

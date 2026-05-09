@@ -34,7 +34,7 @@ const PlayerDetailsPage = () => {
       title={`${player.firstname} ${player.lastname}`}
       description={`Fiche personnelle du joueur`}
       action={
-        <div style={{ display: 'flex', gap: '12px' }}>
+        <div className="app-page__actions-row">
           {player.teamId && (
             <Link to={ROUTES.TEAM_DETAILS.replace(':id', player.teamId)} className="btn btn-secondary">
               Retour à l'équipe
@@ -80,7 +80,7 @@ const PlayerDetailsPage = () => {
                   <p><strong>Équipe</strong></p>
                   <span>
                     {team ? (
-                      <Link to={ROUTES.TEAM_DETAILS.replace(':id', team.id)} style={{ color: 'var(--primary)', fontWeight: '600' }}>
+                      <Link to={ROUTES.TEAM_DETAILS.replace(':id', team.id)} className="table-link">
                         {team.name}
                       </Link>
                     ) : 'Aucune équipe'}

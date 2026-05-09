@@ -1,8 +1,7 @@
 import { Link } from 'react-router-dom';
 import Header from '../../components/layout/Header.jsx';
 import { ROUTES } from '../../utils/routes.js';
-import '../../components/layout/layout.css';
-import './home.css';
+import './HomePage.css';
 
 const HomePage = () => {
   return (
