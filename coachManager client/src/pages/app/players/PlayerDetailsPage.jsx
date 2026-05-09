@@ -1,4 +1,5 @@
-import { useQuery } from '@tanstack/react-query';
+import { useMemo, useState } from 'react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useParams, Link } from 'react-router-dom';
 import * as playerApi from '../../../services/playerService.js';
 import * as teamApi from '../../../services/teamService.js';
@@ -6,12 +7,18 @@ import AppPage from '../AppPage.jsx';
 import Spinner from '../../../components/ui/feedback/Spinner.jsx';
 import Alert from '../../../components/ui/feedback/Alert.jsx';
 import EmptyState from '../../../components/ui/feedback/EmptyState.jsx';
+import Modal from '../../../components/ui/modals/Modal.jsx';
+import PlayerForm from '../../../components/ui/forms/player/PlayerForm.jsx';
 import { ROUTES } from '../../../utils/routes.js';
 import { formatPlayerPosition } from '../../../utils/playerPosition.js';
 import { formatPlayerStatus } from '../../../utils/playerStatus.js';
+import { playerToFormInitialValues } from '../../../utils/playerFormValues.js';
 
 const PlayerDetailsPage = () => {
   const { id } = useParams();
+  const qc = useQueryClient();
+  const [editOpen, setEditOpen] = useState(false);
+  const [formError, setFormError] = useState('');
 
   const playerQuery = useQuery({
     queryKey: ['player', id],
@@ -25,23 +32,67 @@ const PlayerDetailsPage = () => {
 
   const player = playerQuery.data?.item || playerQuery.data?.player || playerQuery.data;
   const teams = teamsQuery.data?.items || [];
-  const team = teams.find(t => String(t.id) === String(player?.teamId));
+  const team = teams.find((t) => String(t.id) === String(player?.teamId));
 
-  if (playerQuery.isLoading || teamsQuery.isLoading) return <AppPage title="Chargement..."><Spinner /></AppPage>;
-  if (playerQuery.error) return <AppPage title="Erreur"><Alert variant="error">{playerQuery.error.message}</Alert></AppPage>;
-  if (!player) return <AppPage title="Joueur non trouvé"><EmptyState title="Joueur non trouvé" /></AppPage>;
+  const initialValues = useMemo(() => playerToFormInitialValues(player), [player]);
+
+  const updateMutation = useMutation({
+    mutationFn: (payload) => playerApi.updatePlayer(id, payload),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['player', id] });
+      qc.invalidateQueries({ queryKey: ['players'] });
+      setEditOpen(false);
+      setFormError('');
+    },
+    onError: (e) => setFormError(e.message || 'Erreur'),
+  });
+
+  if (playerQuery.isLoading || teamsQuery.isLoading) {
+    return (
+      <AppPage title="Chargement...">
+        <Spinner />
+      </AppPage>
+    );
+  }
+  if (playerQuery.error) {
+    return (
+      <AppPage title="Erreur">
+        <Alert variant="error">{playerQuery.error.message}</Alert>
+      </AppPage>
+    );
+  }
+  if (!player) {
+    return (
+      <AppPage title="Joueur non trouvé">
+        <EmptyState title="Joueur non trouvé" />
+      </AppPage>
+    );
+  }
 
   return (
-    <AppPage 
+    <AppPage
       title={`${player.firstname} ${player.lastname}`}
-      description={`Fiche personnelle du joueur`}
+      description="Fiche personnelle du joueur"
       action={
         <div className="app-page__actions-row">
-          {player.teamId && (
-            <Link to={ROUTES.TEAM_DETAILS.replace(':id', player.teamId)} className="btn btn-secondary">
+          <button
+            type="button"
+            className="btn btn-primary"
+            onClick={() => {
+              setFormError('');
+              setEditOpen(true);
+            }}
+          >
+            Modifier
+          </button>
+          {player.teamId ? (
+            <Link
+              to={ROUTES.TEAM_DETAILS.replace(':id', player.teamId)}
+              className="btn btn-secondary"
+            >
               Retour à l'équipe
             </Link>
-          )}
+          ) : null}
           <Link to={ROUTES.PLAYERS} className="btn btn-secondary">
             Tous les joueurs
           </Link>
@@ -55,20 +106,30 @@ const PlayerDetailsPage = () => {
             <div className="activity-list">
               <div className="activity-item">
                 <div className="activity-content">
-                  <p><strong>Email</strong></p>
+                  <p>
+                    <strong>Email</strong>
+                  </p>
                   <span>{player.email || 'Non renseigné'}</span>
                 </div>
               </div>
               <div className="activity-item">
                 <div className="activity-content">
-                  <p><strong>Téléphone</strong></p>
+                  <p>
+                    <strong>Téléphone</strong>
+                  </p>
                   <span>{player.phoneNumber || 'Non renseigné'}</span>
                 </div>
               </div>
               <div className="activity-item">
                 <div className="activity-content">
-                  <p><strong>Date de naissance</strong></p>
-                  <span>{player.birthday ? new Date(player.birthday).toLocaleDateString() : 'Non renseignée'}</span>
+                  <p>
+                    <strong>Date de naissance</strong>
+                  </p>
+                  <span>
+                    {player.birthday
+                      ? new Date(player.birthday).toLocaleDateString()
+                      : 'Non renseignée'}
+                  </span>
                 </div>
               </div>
             </div>
@@ -79,56 +140,79 @@ const PlayerDetailsPage = () => {
             <div className="activity-list">
               <div className="activity-item">
                 <div className="activity-content">
-                  <p><strong>Équipe</strong></p>
+                  <p>
+                    <strong>Équipe</strong>
+                  </p>
                   <span>
                     {team ? (
-                      <Link to={ROUTES.TEAM_DETAILS.replace(':id', team.id)} className="table-link">
+                      <Link
+                        to={ROUTES.TEAM_DETAILS.replace(':id', team.id)}
+                        className="table-link"
+                      >
                         {team.name}
                       </Link>
-                    ) : 'Aucune équipe'}
+                    ) : (
+                      'Aucune équipe'
+                    )}
                   </span>
                 </div>
               </div>
               <div className="activity-item">
                 <div className="activity-content">
-                  <p><strong>Poste</strong></p>
+                  <p>
+                    <strong>Poste</strong>
+                  </p>
                   <span>{formatPlayerPosition(player.position) || 'Non défini'}</span>
                 </div>
               </div>
               <div className="activity-item">
                 <div className="activity-content">
-                  <p><strong>Statut</strong></p>
+                  <p>
+                    <strong>Statut</strong>
+                  </p>
                   <span>{formatPlayerStatus(player.status) || 'Non défini'}</span>
                 </div>
               </div>
               <div className="activity-item">
                 <div className="activity-content">
-                  <p><strong>Note</strong></p>
-                  <span>{player.rating ? `${player.rating} / 100` : 'Pas de note'}</span>
+                  <p>
+                    <strong>Note</strong>
+                  </p>
+                  <span>
+                    {player.rating ? `${player.rating} / 100` : 'Pas de note'}
+                  </span>
                 </div>
               </div>
             </div>
           </section>
 
-          {(player.emergencyName || player.emergencyEmail || player.emergencyPhoneNumber) && (
+          {(player.emergencyName ||
+            player.emergencyEmail ||
+            player.emergencyPhoneNumber) && (
             <section className="dashboard-section">
               <h3>Contact d'urgence</h3>
               <div className="activity-list">
                 <div className="activity-item">
                   <div className="activity-content">
-                    <p><strong>Nom</strong></p>
+                    <p>
+                      <strong>Nom</strong>
+                    </p>
                     <span>{player.emergencyName || '—'}</span>
                   </div>
                 </div>
                 <div className="activity-item">
                   <div className="activity-content">
-                    <p><strong>Email</strong></p>
+                    <p>
+                      <strong>Email</strong>
+                    </p>
                     <span>{player.emergencyEmail || '—'}</span>
                   </div>
                 </div>
                 <div className="activity-item">
                   <div className="activity-content">
-                    <p><strong>Téléphone</strong></p>
+                    <p>
+                      <strong>Téléphone</strong>
+                    </p>
                     <span>{player.emergencyPhoneNumber || '—'}</span>
                   </div>
                 </div>
@@ -137,6 +221,24 @@ const PlayerDetailsPage = () => {
           )}
         </div>
       </div>
+
+      <Modal
+        isOpen={editOpen}
+        onClose={() => {
+          setEditOpen(false);
+          setFormError('');
+        }}
+        title="Modifier le joueur"
+      >
+        {formError ? <Alert variant="error">{formError}</Alert> : null}
+        <PlayerForm
+          teams={teams}
+          initialValues={initialValues}
+          isSubmitting={updateMutation.isPending}
+          serverErrors={[]}
+          onSubmit={(payload) => updateMutation.mutate(payload)}
+        />
+      </Modal>
     </AppPage>
   );
 };

@@ -12,11 +12,7 @@ import AppPage from '../AppPage.jsx';
 import { Link } from 'react-router-dom';
 import { ROUTES } from '../../../utils/routes.js';
 import { formatPlayerPosition } from '../../../utils/playerPosition.js';
-
-function birthdayInputValue(iso) {
-  if (!iso) return '';
-  return String(iso).slice(0, 10);
-}
+import { playerToFormInitialValues } from '../../../utils/playerFormValues.js';
 
 export default function PlayersPage() {
   const qc = useQueryClient();
@@ -35,26 +31,7 @@ export default function PlayersPage() {
     queryFn: playerApi.fetchPlayers,
   });
 
-  const initialValues = useMemo(() => {
-    if (!detail) {
-      return {};
-    }
-    return {
-      firstname: detail.firstname || '',
-      lastname: detail.lastname || '',
-      email: detail.email || '',
-      phoneNumber: detail.phoneNumber || '',
-      birthday: birthdayInputValue(detail.birthday),
-      avatar: detail.avatar || '',
-      position: detail.position || '',
-      status: detail.status || '',
-      rating: detail.rating ?? '',
-      emergencyName: detail.emergencyName || '',
-      emergencyEmail: detail.emergencyEmail || '',
-      emergencyPhoneNumber: detail.emergencyPhoneNumber || '',
-      teamId: detail.teamId ? String(detail.teamId) : '',
-    };
-  }, [detail]);
+  const initialValues = useMemo(() => playerToFormInitialValues(detail), [detail]);
 
   const saveMutation = useMutation({
     mutationFn: (payload) =>
@@ -63,6 +40,9 @@ export default function PlayersPage() {
         : playerApi.createPlayer(payload),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['players'] });
+      if (editingId != null) {
+        qc.invalidateQueries({ queryKey: ['player', String(editingId)] });
+      }
       setModalOpen(false);
       setEditingId(null);
       setDetail(null);
