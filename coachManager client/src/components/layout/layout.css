@@ -12,18 +12,24 @@
   min-height: 0;
 }
 
+.app-layout__content-wrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
 .app-layout__main {
   flex: 1;
   min-width: 0;
   padding: 24px;
-  max-width: 1400px;
-  margin: 0 auto;
   width: 100%;
 }
 
 @media (min-width: 1025px) {
   .app-layout__main {
-    padding: 32px 40px;
+    padding: 40px;
+    max-width: 1600px;
   }
 }
 
@@ -41,6 +47,12 @@
   position: sticky;
   top: 0;
   z-index: 100;
+}
+
+@media (min-width: 1025px) {
+  .layout-header {
+    min-height: 72px;
+  }
 }
 
 @media (min-width: 640px) {
@@ -125,6 +137,12 @@
   }
 }
 
+@media (min-width: 1025px) {
+  .layout-header__logo {
+    font-size: 1.5rem;
+  }
+}
+
 .layout-header__nav {
   display: none;
 }
@@ -167,7 +185,7 @@
 
 @media (min-width: 640px) {
   .layout-header__actions {
-    gap: 12px;
+    gap: 16px;
   }
 }
 
@@ -223,6 +241,15 @@
   transition: var(--transition);
 }
 
+@media (min-width: 1025px) {
+  .layout-sidebar {
+    position: sticky;
+    top: 72px;
+    height: calc(100vh - 72px);
+    background: var(--bg);
+  }
+}
+
 @media (max-width: 1024px) {
   .layout-sidebar {
     position: fixed;
@@ -254,21 +281,24 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 10px 12px;
+  padding: 12px 16px;
   border-radius: var(--radius);
   font-size: 0.9375rem;
   font-weight: 500;
   color: var(--text);
+  transition: var(--transition);
 }
 
 .layout-sidebar nav a:hover {
   background: var(--bg-soft);
   color: var(--text-h);
+  transform: translateX(4px);
 }
 
 .layout-sidebar nav a.is-active {
-  background: var(--primary);
-  color: #fff;
+  background: var(--primary-bg);
+  color: var(--primary);
+  font-weight: 600;
 }
 
 /* —— Buttons —— */
@@ -376,6 +406,14 @@
   border-radius: var(--radius-lg);
   padding: 24px;
   box-shadow: var(--shadow-sm);
+  transition: var(--transition);
+}
+
+@media (min-width: 1025px) {
+  .app-page__content {
+    padding: 32px;
+    box-shadow: var(--shadow);
+  }
 }
 
 /* —— Forms —— */
@@ -546,10 +584,16 @@
   justify-content: space-between;
   gap: 20px;
   padding: 24px;
-  background: var(--bg);
+  background: var(--bg-soft);
   border-top: 1px solid var(--border);
   font-size: 0.875rem;
   color: var(--text-muted);
+}
+
+@media (min-width: 1025px) {
+  .layout-footer {
+    padding: 24px 40px;
+  }
 }
 
 .layout-footer__copy {

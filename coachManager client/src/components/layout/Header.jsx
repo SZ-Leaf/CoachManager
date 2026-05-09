@@ -45,20 +45,22 @@ const Header = ({ onMenuToggle, menuOpen }) => {
           </Link>
         </div>
 
-        <nav className="layout-header__nav" aria-label="Navigation principale">
-          <ul>
-            {LAYOUT_NAV_LINKS.map(({ to, label }) => (
-              <li key={label}>
-                <NavLink
-                  to={to}
-                  className={({ isActive }) => (isActive ? 'is-active' : undefined)}
-                >
-                  {label}
-                </NavLink>
-              </li>
-            ))}
-          </ul>
-        </nav>
+        {!hasSidebar && (
+          <nav className="layout-header__nav" aria-label="Navigation principale">
+            <ul>
+              {LAYOUT_NAV_LINKS.map(({ to, label }) => (
+                <li key={label}>
+                  <NavLink
+                    to={to}
+                    className={({ isActive }) => (isActive ? 'is-active' : undefined)}
+                  >
+                    {label}
+                  </NavLink>
+                </li>
+              ))}
+            </ul>
+          </nav>
+        )}
 
         <div className="layout-header__actions">
           {user ? (

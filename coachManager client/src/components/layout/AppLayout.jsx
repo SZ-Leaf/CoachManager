@@ -16,11 +16,13 @@ const AppLayout = () => {
       <Header onMenuToggle={toggleSidebar} menuOpen={sidebarOpen} />
       <div className="app-layout__shell">
         <Sidebar open={sidebarOpen} onNavigate={closeSidebar} />
-        <main className="app-layout__main" id="main-content">
-          <Outlet />
-        </main>
+        <div className="app-layout__content-wrapper">
+          <main className="app-layout__main" id="main-content">
+            <Outlet />
+          </main>
+          <Footer />
+        </div>
       </div>
-      <Footer />
     </div>
   );
 };
