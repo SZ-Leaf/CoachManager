@@ -148,50 +148,84 @@ export default function TeamsPage() {
     return list;
   }, [teams, filterCategory, filterSeason]);
 
+  const hasActiveFilters = Boolean(filterCategory || filterSeason);
+
+  const resetFilters = () => {
+    setFilterCategory('');
+    setFilterSeason('');
+  };
+
   return (
     <AppPage
       title="Équipes"
       description="Créez et gérez vos équipes, catégories et saison."
     >
       <div className="teams-page crud-page">
-        <div className="crud-toolbar">
-          <button type="button" className="btn btn-primary" onClick={openCreate}>
-            + Nouvelle équipe
-          </button>
-          {teams.length > 0 ? (
-            <>
-              <select
-                aria-label="Filtrer par catégorie"
-                value={filterCategory}
-                onChange={(e) => setFilterCategory(e.target.value)}
-              >
-                <option value="">Toutes les catégories</option>
-                {hasUncategorized ? (
-                  <option value={UNCATEGORIZED}>Sans catégorie</option>
+        <div className="crud-toolbar teams-page__toolbar">
+          <div className="teams-page__toolbar-strip">
+            <button type="button" className="btn btn-primary" onClick={openCreate}>
+              + Nouvelle équipe
+            </button>
+            {teams.length > 0 ? (
+              <>
+                <select
+                  aria-label="Filtrer par catégorie"
+                  value={filterCategory}
+                  onChange={(e) => setFilterCategory(e.target.value)}
+                >
+                  <option value="">Toutes les catégories</option>
+                  {hasUncategorized ? (
+                    <option value={UNCATEGORIZED}>Sans catégorie</option>
+                  ) : null}
+                  {categoryOptions.map((c) => (
+                    <option key={c} value={c}>
+                      {c}
+                    </option>
+                  ))}
+                </select>
+                <select
+                  aria-label="Filtrer par saison"
+                  value={filterSeason}
+                  onChange={(e) => setFilterSeason(e.target.value)}
+                >
+                  <option value="">Toutes les saisons</option>
+                  {hasNoSeason ? (
+                    <option value={UNSEASONED}>Sans saison</option>
+                  ) : null}
+                  {seasonOptions.map((raw) => (
+                    <option key={raw} value={raw}>
+                      {formatSeasonSportsRange(raw)}
+                    </option>
+                  ))}
+                </select>
+                {hasActiveFilters ? (
+                  <button
+                    type="button"
+                    className="btn btn-secondary teams-page__reset-btn"
+                    onClick={resetFilters}
+                    aria-label="Réinitialiser les filtres"
+                    title="Réinitialiser les filtres"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      aria-hidden="true"
+                    >
+                      <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+                      <path d="M3 3v5h5" />
+                    </svg>
+                  </button>
                 ) : null}
-                {categoryOptions.map((c) => (
-                  <option key={c} value={c}>
-                    {c}
-                  </option>
-                ))}
-              </select>
-              <select
-                aria-label="Filtrer par saison"
-                value={filterSeason}
-                onChange={(e) => setFilterSeason(e.target.value)}
-              >
-                <option value="">Toutes les saisons</option>
-                {hasNoSeason ? (
-                  <option value={UNSEASONED}>Sans saison</option>
-                ) : null}
-                {seasonOptions.map((raw) => (
-                  <option key={raw} value={raw}>
-                    {formatSeasonSportsRange(raw)}
-                  </option>
-                ))}
-              </select>
-            </>
-          ) : null}
+              </>
+            ) : null}
+          </div>
         </div>
 
         {teamsQuery.isLoading ? <Spinner /> : null}
