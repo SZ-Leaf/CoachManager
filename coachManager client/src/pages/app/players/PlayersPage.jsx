@@ -12,7 +12,7 @@ import AppPage from '../AppPage.jsx';
 import { Link } from 'react-router-dom';
 import { ROUTES } from '../../../utils/routes.js';
 import { formatPlayerPosition, PLAYER_POSITIONS } from '../../../utils/playerPosition.js';
-import { PLAYER_STATUSES } from '../../../utils/playerStatus.js';
+import { formatPlayerStatus, PLAYER_STATUSES } from '../../../utils/playerStatus.js';
 import { playerToFormInitialValues } from '../../../utils/playerFormValues.js';
 
 function comparePlayersByName(a, b) {
@@ -230,6 +230,7 @@ export default function PlayersPage() {
                   <th>Nom</th>
                   <th>Équipe</th>
                   <th>Poste</th>
+                  <th>Statut</th>
                   <th />
                 </tr>
               </thead>
@@ -247,6 +248,7 @@ export default function PlayersPage() {
                         : '—'}
                     </td>
                     <td data-label="Poste">{formatPlayerPosition(p.position) || '—'}</td>
+                    <td data-label="Statut">{formatPlayerStatus(p.status) || '—'}</td>
                     <td data-label="Actions" className="crud-table__actions crud-table__actions--split">
                       <div className="crud-table__actions-start">
                         <Link to={ROUTES.PLAYER_DETAILS.replace(':id', p.id)} className="btn btn-secondary btn-compact">

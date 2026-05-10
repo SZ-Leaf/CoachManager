@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 
 import Modal from '../../../components/ui/modals/Modal.jsx';
 import Alert from '../../../components/ui/feedback/Alert.jsx';
@@ -13,12 +13,46 @@ import { ROUTES } from '../../../utils/routes.js';
 
 const emptyForm = { name: '', category: '', season: '', clubId: '' };
 
+const UNCATEGORIZED = '__none__';
+const UNSEASONED = '__no_season__';
+
+function seasonKey(team) {
+  const s = team.season;
+  if (s == null || s === '') {
+    return '';
+  }
+  return String(s).trim();
+}
+
+/** Saison API (souvent AAAA-MM-JJ) → libellé affichage liste / filtre */
+function formatSeasonOptionLabel(raw) {
+  if (!raw) {
+    return '';
+  }
+  const m = String(raw).match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (!m) {
+    return String(raw);
+  }
+  const [, y, mo, d] = m;
+  const dt = new Date(Number(y), Number(mo) - 1, Number(d));
+  if (Number.isNaN(dt.getTime())) {
+    return String(raw);
+  }
+  return dt.toLocaleDateString('fr-FR', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  });
+}
+
 export default function TeamsPage() {
   const qc = useQueryClient();
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState(null);
   const [form, setForm] = useState(emptyForm);
   const [formError, setFormError] = useState('');
+  const [filterCategory, setFilterCategory] = useState('');
+  const [filterSeason, setFilterSeason] = useState('');
 
   const clubsQuery = useQuery({
     queryKey: ['clubs'],
@@ -79,6 +113,54 @@ export default function TeamsPage() {
 
   const teams = teamsQuery.data?.items ?? [];
 
+  const categoryOptions = useMemo(() => {
+    const seen = new Set();
+    for (const t of teams) {
+      const c = (t.category ?? '').trim();
+      if (c) {
+        seen.add(c);
+      }
+    }
+    return [...seen].sort((a, b) => a.localeCompare(b, 'fr', { sensitivity: 'base' }));
+  }, [teams]);
+
+  const hasUncategorized = useMemo(
+    () => teams.some((t) => !(t.category ?? '').trim()),
+    [teams],
+  );
+
+  const seasonOptions = useMemo(() => {
+    const seen = new Set();
+    for (const t of teams) {
+      const key = seasonKey(t);
+      if (key) {
+        seen.add(key);
+      }
+    }
+    return [...seen].sort((a, b) => a.localeCompare(b, 'fr'));
+  }, [teams]);
+
+  const hasNoSeason = useMemo(() => teams.some((t) => !seasonKey(t)), [teams]);
+
+  const filteredTeams = useMemo(() => {
+    let list = teams;
+    if (filterCategory) {
+      if (filterCategory === UNCATEGORIZED) {
+        list = list.filter((t) => !(t.category ?? '').trim());
+      } else {
+        list = list.filter((t) => (t.category ?? '').trim() === filterCategory);
+      }
+    }
+    if (filterSeason) {
+      if (filterSeason === UNSEASONED) {
+        list = list.filter((t) => !seasonKey(t));
+      } else {
+        list = list.filter((t) => seasonKey(t) === filterSeason);
+      }
+    }
+    return list;
+  }, [teams, filterCategory, filterSeason]);
+
   return (
     <AppPage
       title="Équipes"
@@ -89,6 +171,40 @@ export default function TeamsPage() {
           <button type="button" className="btn btn-primary" onClick={openCreate}>
             + Nouvelle équipe
           </button>
+          {teams.length > 0 ? (
+            <>
+              <select
+                aria-label="Filtrer par catégorie"
+                value={filterCategory}
+                onChange={(e) => setFilterCategory(e.target.value)}
+              >
+                <option value="">Toutes les catégories</option>
+                {hasUncategorized ? (
+                  <option value={UNCATEGORIZED}>Sans catégorie</option>
+                ) : null}
+                {categoryOptions.map((c) => (
+                  <option key={c} value={c}>
+                    {c}
+                  </option>
+                ))}
+              </select>
+              <select
+                aria-label="Filtrer par saison"
+                value={filterSeason}
+                onChange={(e) => setFilterSeason(e.target.value)}
+              >
+                <option value="">Toutes les saisons</option>
+                {hasNoSeason ? (
+                  <option value={UNSEASONED}>Sans saison</option>
+                ) : null}
+                {seasonOptions.map((raw) => (
+                  <option key={raw} value={raw}>
+                    {formatSeasonOptionLabel(raw)}
+                  </option>
+                ))}
+              </select>
+            </>
+          ) : null}
         </div>
 
         {teamsQuery.isLoading ? <Spinner /> : null}
@@ -103,7 +219,14 @@ export default function TeamsPage() {
           />
         ) : null}
 
-        {teams.length > 0 ? (
+        {!teamsQuery.isLoading && teams.length > 0 && filteredTeams.length === 0 ? (
+          <EmptyState
+            title="Aucun résultat"
+            description="Aucune équipe ne correspond aux filtres sélectionnés."
+          />
+        ) : null}
+
+        {filteredTeams.length > 0 ? (
           <div className="crud-table-wrap">
             <table className="crud-table">
               <thead>
@@ -116,7 +239,7 @@ export default function TeamsPage() {
                 </tr>
               </thead>
               <tbody>
-                {teams.map((t) => (
+                {filteredTeams.map((t) => (
                   <tr key={t.id}>
                     <td data-label="Nom">
                       <Link to={ROUTES.TEAM_DETAILS.replace(':id', t.id)} className="table-link">
@@ -124,7 +247,7 @@ export default function TeamsPage() {
                       </Link>
                     </td>
                     <td data-label="Catégorie">{t.category || '—'}</td>
-                    <td data-label="Saison">{t.season || '—'}</td>
+                    <td data-label="Saison">{formatSeasonOptionLabel(seasonKey(t)) || '—'}</td>
                     <td data-label="Club">{t.clubId ?? '—'}</td>
                     <td data-label="Actions" className="crud-table__actions crud-table__actions--split">
                       <div className="crud-table__actions-start">
