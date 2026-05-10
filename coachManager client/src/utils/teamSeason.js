@@ -23,7 +23,8 @@ export function startYearToSeasonApiValue(startYearStr) {
   if (!Number.isFinite(y) || y < 1900 || y > 2100) {
     return '';
   }
-  return `${String(y).padStart(4, '0')}-07-01`;
+  const monthPart = String(SEASON_START_MONTH).padStart(2, '0');
+  return `${String(y).padStart(4, '0')}-${monthPart}-01`;
 }
 
 export function formatSeasonSportsRange(raw) {
