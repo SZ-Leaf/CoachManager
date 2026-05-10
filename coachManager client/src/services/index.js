@@ -8,3 +8,4 @@ export * from './listService.js';
 export * from './productService.js';
 export * from './attendanceService.js';
 export * from './messagesService.js';
+export * from './dashboardService.js';

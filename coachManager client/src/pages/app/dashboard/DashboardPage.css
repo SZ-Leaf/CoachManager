@@ -5,6 +5,13 @@
   gap: var(--space-8);
 }
 
+.dashboard-page__stats-hint {
+  margin: 0 0 var(--space-2);
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  max-width: 42rem;
+}
+
 .dashboard-grid {
   display: grid;
   grid-template-columns: 1fr;
