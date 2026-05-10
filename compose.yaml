@@ -49,6 +49,9 @@ services:
       APP_DEBUG: "0"
       APP_SECRET: ${APP_SECRET}
       DATABASE_URL: "mysql://${MYSQL_USER}:${MYSQL_PASSWORD}@database:3306/${MYSQL_DATABASE}?serverVersion=${MYSQL_SERVER_VERSION}&charset=utf8mb4"
+    command: >
+      bash -lc "php bin/console cache:clear --env=prod --no-ansi --no-interaction &&
+                exec apache2-foreground"
     depends_on:
       database:
         condition: service_healthy
