@@ -22,9 +22,6 @@ class CreatePlayerService
     ) {
     }
 
-    /**
-     * @throws CreatePlayerException
-     */
     public function create(User $coach, CreatePlayerRequest $dto): array
     {
         $violations = $this->validator->validate($dto);

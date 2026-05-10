@@ -78,9 +78,6 @@ class Inventory
         return $this;
     }
 
-    /**
-     * @return Collection<int, ItemList>
-     */
     public function getItemLists(): Collection
     {
         return $this->itemLists;

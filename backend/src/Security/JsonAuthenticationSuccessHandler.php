@@ -22,9 +22,6 @@ final class JsonAuthenticationSuccessHandler implements AuthenticationSuccessHan
         ]);
     }
 
-    /**
-     * @return array{id: int|null, firstname: string|null, lastname: string|null, email: string|null, avatar: string|null}
-     */
     public static function serializeUser(User $user): array
     {
         return [

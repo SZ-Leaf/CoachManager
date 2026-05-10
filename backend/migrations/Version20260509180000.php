@@ -7,10 +7,6 @@ namespace DoctrineMigrations;
 use Doctrine\DBAL\Schema\Schema;
 use Doctrine\Migrations\AbstractMigration;
 
-/**
- * Annule localement l’effet de l’ancienne migration « saison en AAAA-AAAA » si elle a été exécutée.
- * Si team.season est déjà en DATE, cette migration ne modifie rien (aligné avec l’entité Team actuelle).
- */
 final class Version20260509180000 extends AbstractMigration
 {
     public function getDescription(): string

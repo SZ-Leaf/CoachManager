@@ -135,9 +135,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    /**
-     * @return Collection<int, Team>
-     */
     public function getTeams(): Collection
     {
         return $this->teams;
@@ -169,9 +166,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return (string) $this->email;
     }
 
-    /**
-     * @return list<string>
-     */
     public function getRoles(): array
     {
         return ['ROLE_USER'];

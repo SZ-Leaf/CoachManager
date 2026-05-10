@@ -23,9 +23,6 @@ class ProductService
     ) {
     }
 
-    /**
-     * @throws CreateProductException
-     */
     public function create(User $coach, CreateProductRequest $dto): array
     {
         $violations = $this->validator->validate($dto);
@@ -53,9 +50,6 @@ class ProductService
         return $this->serialize($product);
     }
 
-    /**
-     * @throws UpdateProductException
-     */
     public function update(User $coach, int $id, UpdateProductRequest $dto): array
     {
         $violations = $this->validator->validate($dto);
@@ -88,9 +82,6 @@ class ProductService
         return $this->serialize($product);
     }
 
-    /**
-     * @return list<array<string, mixed>>
-     */
     public function listForCoach(User $coach): array
     {
         return array_map(
@@ -99,9 +90,6 @@ class ProductService
         );
     }
 
-    /**
-     * @return array<string, mixed>
-     */
     public function getForCoach(User $coach, int $id): array
     {
         $product = $this->productRepository->findOneByIdForCoach($id, $coach);
@@ -122,9 +110,6 @@ class ProductService
         $this->em->flush();
     }
 
-    /**
-     * @return array<string, mixed>
-     */
     private function serialize(Product $product): array
     {
         return [

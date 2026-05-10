@@ -7,9 +7,6 @@ use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
-/**
- * @extends ServiceEntityRepository<Attendance>
- */
 class AttendanceRepository extends ServiceEntityRepository
 {
     public function __construct(ManagerRegistry $registry)
@@ -17,9 +14,6 @@ class AttendanceRepository extends ServiceEntityRepository
         parent::__construct($registry, Attendance::class);
     }
 
-    /**
-     * @return list<Attendance>
-     */
     public function findAllForCoach(User $coach): array
     {
         $qb = $this->createQueryBuilder('a')
@@ -48,9 +42,6 @@ class AttendanceRepository extends ServiceEntityRepository
             ->getOneOrNullResult();
     }
 
-    /**
-     * @return list<Attendance>
-     */
     public function findByTeamAndSessionForCoach(int $teamId, \DateTimeImmutable $sessionAt, User $coach): array
     {
         $qb = $this->createQueryBuilder('a')

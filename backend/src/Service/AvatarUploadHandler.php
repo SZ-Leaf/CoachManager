@@ -9,7 +9,6 @@ final class AvatarUploadHandler
 {
     private const int MAX_BYTES = 2_097_152;
 
-    /** @var list<string> */
     private const array ALLOWED_MIME = [
         'image/jpeg',
         'image/png',
@@ -22,9 +21,6 @@ final class AvatarUploadHandler
     ) {
     }
 
-    /**
-     * @throws UpdateUserException
-     */
     public function store(UploadedFile $file): string
     {
         if (!$file->isValid()) {

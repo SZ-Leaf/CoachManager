@@ -7,9 +7,6 @@ namespace DoctrineMigrations;
 use Doctrine\DBAL\Schema\Schema;
 use Doctrine\Migrations\AbstractMigration;
 
-/**
- * Align schema with entities: team↔inventory 1:1, inventory→lists, product→item_list, team.coach, club.coach.
- */
 final class Version20260507140000 extends AbstractMigration
 {
     public function getDescription(): string

@@ -21,9 +21,6 @@ class InventoryService
     ) {
     }
 
-    /**
-     * @throws CreateInventoryException
-     */
     public function create(User $coach, CreateInventoryRequest $dto): array
     {
         $violations = $this->validator->validate($dto);
@@ -55,9 +52,6 @@ class InventoryService
         return $this->serialize($inventory);
     }
 
-    /**
-     * @return list<array<string, mixed>>
-     */
     public function listForCoach(User $coach): array
     {
         return array_map(
@@ -66,9 +60,6 @@ class InventoryService
         );
     }
 
-    /**
-     * @return array<string, mixed>
-     */
     public function getForCoach(User $coach, int $id): array
     {
         $inventory = $this->inventoryRepository->findOneByIdForCoach($id, $coach);
@@ -79,9 +70,6 @@ class InventoryService
         return $this->serialize($inventory);
     }
 
-    /**
-     * @return array<string, mixed>
-     */
     public function touch(User $coach, int $id): array
     {
         $inventory = $this->inventoryRepository->findOneByIdForCoach($id, $coach);
@@ -111,9 +99,6 @@ class InventoryService
         $this->em->flush();
     }
 
-    /**
-     * @return array<string, mixed>
-     */
     private function serialize(Inventory $inventory): array
     {
         return [

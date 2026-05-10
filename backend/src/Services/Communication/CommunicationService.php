@@ -19,9 +19,6 @@ class CommunicationService
     ) {
     }
 
-    /**
-     * @return list<array<string, mixed>>
-     */
     public function listForCoach(User $coach): array
     {
         return array_map(
@@ -30,9 +27,6 @@ class CommunicationService
         );
     }
 
-    /**
-     * @return array<string, mixed>
-     */
     public function getForCoach(User $coach, int $id): array
     {
         $c = $this->communicationRepository->findOneByIdForCoach($id, $coach);
@@ -43,11 +37,6 @@ class CommunicationService
         return $this->serialize($c);
     }
 
-    /**
-     * @param array{playerId: int, recipientType?: ?string, recipientEmail?: ?string, subject?: ?string, body?: ?string, status?: ?string, sentAt?: ?string} $data
-     *
-     * @return array<string, mixed>
-     */
     public function create(User $coach, array $data): array
     {
         $playerId = (int) ($data['playerId'] ?? 0);
@@ -78,11 +67,6 @@ class CommunicationService
         return $this->serialize($c);
     }
 
-    /**
-     * @param array{playerId?: ?int, recipientType?: ?string, recipientEmail?: ?string, subject?: ?string, body?: ?string, status?: ?string, sentAt?: ?string} $data
-     *
-     * @return array<string, mixed>
-     */
     public function update(User $coach, int $id, array $data): array
     {
         $c = $this->communicationRepository->findOneByIdForCoach($id, $coach);
@@ -133,9 +117,6 @@ class CommunicationService
         $this->em->flush();
     }
 
-    /**
-     * @return array<string, mixed>
-     */
     private function serialize(Communication $c): array
     {
         return [

@@ -21,9 +21,6 @@ class ItemListService
     ) {
     }
 
-    /**
-     * @throws CreateItemListException
-     */
     public function create(User $coach, CreateItemListRequest $dto): array
     {
         $violations = $this->validator->validate($dto);
@@ -50,9 +47,6 @@ class ItemListService
         return $this->serialize($list);
     }
 
-    /**
-     * @return list<array<string, mixed>>
-     */
     public function listForCoach(User $coach): array
     {
         return array_map(
@@ -61,9 +55,6 @@ class ItemListService
         );
     }
 
-    /**
-     * @return array<string, mixed>
-     */
     public function getForCoach(User $coach, int $id): array
     {
         $list = $this->itemListRepository->findOneByIdForCoach($id, $coach);
@@ -74,9 +65,6 @@ class ItemListService
         return $this->serialize($list);
     }
 
-    /**
-     * @return array<string, mixed>
-     */
     public function update(User $coach, int $id, string $name): array
     {
         $list = $this->itemListRepository->findOneByIdForCoach($id, $coach);
@@ -106,9 +94,6 @@ class ItemListService
         $this->em->flush();
     }
 
-    /**
-     * @return array<string, mixed>
-     */
     private function serialize(ItemList $list): array
     {
         return [

@@ -9,12 +9,10 @@ export const updateAttendance = (id, body) =>
 export const deleteAttendance = (id) =>
   apiRequest(`/api/attendances/${id}`, { method: 'DELETE' });
 
-/** @param {string|number} teamId */
 export const fetchTeamRollCall = (teamId, sessionAtIso) =>
   apiRequest(
     `/api/teams/roll-call/${teamId}?sessionAt=${encodeURIComponent(sessionAtIso)}`,
   );
 
-/** @param {string|number} teamId */
 export const saveTeamRollCall = (teamId, body) =>
   apiRequest(`/api/teams/roll-call/${teamId}`, { method: 'POST', body });

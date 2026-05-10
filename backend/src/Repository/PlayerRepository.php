@@ -7,9 +7,6 @@ use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
-/**
- * @extends ServiceEntityRepository<Player>
- */
 class PlayerRepository extends ServiceEntityRepository
 {
     public function __construct(ManagerRegistry $registry)
@@ -17,9 +14,6 @@ class PlayerRepository extends ServiceEntityRepository
         parent::__construct($registry, Player::class);
     }
 
-    /**
-     * @return Player[]
-     */
     public function findAllByCoach(User $coach): array
     {
         $qb = $this->createQueryBuilder('player')
@@ -45,9 +39,6 @@ class PlayerRepository extends ServiceEntityRepository
             ->getOneOrNullResult();
     }
 
-    /**
-     * @return list<Player>
-     */
     public function findAllByTeamIdAndCoach(int $teamId, User $coach): array
     {
         $qb = $this->createQueryBuilder('player')
@@ -63,10 +54,7 @@ class PlayerRepository extends ServiceEntityRepository
             ->getResult();
     }
 
-    //    /**
-    //     * @return Player[] Returns an array of Player objects
-    //     */
-    //    public function findByExampleField($value): array
+    //    //    public function findByExampleField($value): array
     //    {
     //        return $this->createQueryBuilder('p')
     //            ->andWhere('p.exampleField = :val')

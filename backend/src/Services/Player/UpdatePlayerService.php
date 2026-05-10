@@ -23,9 +23,6 @@ class UpdatePlayerService
     ) {
     }
 
-    /**
-     * @throws UpdatePlayerException
-     */
     public function update(User $coach, int $id, UpdatePlayerRequest $dto): array
     {
         $violations = $this->validator->validate($dto);

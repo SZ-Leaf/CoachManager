@@ -20,9 +20,6 @@ class AttendanceService
     ) {
     }
 
-    /**
-     * @return list<array<string, mixed>>
-     */
     public function listForCoach(User $coach): array
     {
         return array_map(
@@ -31,9 +28,6 @@ class AttendanceService
         );
     }
 
-    /**
-     * @return array<string, mixed>
-     */
     public function getForCoach(User $coach, int $id): array
     {
         $a = $this->attendanceRepository->findOneByIdForCoach($id, $coach);
@@ -44,11 +38,6 @@ class AttendanceService
         return $this->serialize($a);
     }
 
-    /**
-     * @param array{playerId: int, date?: ?string, status?: ?string, comment?: ?string} $data
-     *
-     * @return array<string, mixed>
-     */
     public function create(User $coach, array $data): array
     {
         $playerId = (int) ($data['playerId'] ?? 0);
@@ -75,11 +64,6 @@ class AttendanceService
         return $this->serialize($a);
     }
 
-    /**
-     * @param array{date?: ?string, status?: ?string, comment?: ?string, playerId?: ?int} $data
-     *
-     * @return array<string, mixed>
-     */
     public function update(User $coach, int $id, array $data): array
     {
         $a = $this->attendanceRepository->findOneByIdForCoach($id, $coach);
@@ -121,11 +105,6 @@ class AttendanceService
         $this->em->flush();
     }
 
-    /**
-     * État d'appel pour une séance donnée : tous les joueurs de l'équipe + statut enregistré le cas échéant.
-     *
-     * @return array{sessionAt: string, teamId: int, players: list<array<string, mixed>>}
-     */
     public function getTeamRollCallForCoach(User $coach, int $teamId, string $sessionAtIso): array
     {
         $team = $this->teamRepository->findOneByIdAndCoach($teamId, $coach);
@@ -168,11 +147,6 @@ class AttendanceService
         ];
     }
 
-    /**
-     * @param array{sessionAt: string, entries?: mixed} $data
-     *
-     * @return array{sessionAt: string, teamId: int, players: list<array<string, mixed>>}
-     */
     public function saveTeamRollCall(User $coach, int $teamId, array $data): array
     {
         $team = $this->teamRepository->findOneByIdAndCoach($teamId, $coach);
@@ -201,7 +175,6 @@ class AttendanceService
             $allowedIds[$p->getId()] = true;
         }
 
-        /** @var array<int, AttendanceStatus> $statusByPlayer */
         $statusByPlayer = [];
         foreach ($entries as $entry) {
             if (!\is_array($entry)) {
@@ -253,9 +226,6 @@ class AttendanceService
         return $this->getTeamRollCallForCoach($coach, $teamId, $sessionAt->format(\DateTimeInterface::ATOM));
     }
 
-    /**
-     * @return array<string, mixed>
-     */
     private function serialize(Attendance $a): array
     {
         return [

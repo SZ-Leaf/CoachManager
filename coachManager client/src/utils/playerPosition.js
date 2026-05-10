@@ -1,4 +1,3 @@
-/** Valeurs API (inchangées en base) → libellés français pour l’affichage. */
 export const PLAYER_POSITIONS = [
   { value: 'goalkeeper', label: 'Gardien' },
   { value: 'defender', label: 'Défenseur' },

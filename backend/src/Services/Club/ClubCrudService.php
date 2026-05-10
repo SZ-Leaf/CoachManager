@@ -16,17 +16,11 @@ class ClubCrudService
     ) {
     }
 
-    /**
-     * @return list<array<string, mixed>>
-     */
     public function listForCoach(User $coach): array
     {
         return array_map(fn (Club $c) => $this->serialize($c), $this->clubRepository->findAllForCoach($coach));
     }
 
-    /**
-     * @return array<string, mixed>
-     */
     public function getForCoach(User $coach, int $id): array
     {
         $club = $this->clubRepository->findOneByIdForCoach($id, $coach);
@@ -37,11 +31,6 @@ class ClubCrudService
         return $this->serialize($club);
     }
 
-    /**
-     * @param array{name: string, discipline?: ?string, logo?: ?string, description?: ?string} $data
-     *
-     * @return array<string, mixed>
-     */
     public function create(User $coach, array $data): array
     {
         $name = trim($data['name'] ?? '');
@@ -67,11 +56,6 @@ class ClubCrudService
         return $this->serialize($club);
     }
 
-    /**
-     * @param array{name?: ?string, discipline?: ?string, logo?: ?string, description?: ?string} $data
-     *
-     * @return array<string, mixed>
-     */
     public function update(User $coach, int $id, array $data): array
     {
         $club = $this->clubRepository->findOneByIdForCoach($id, $coach);
@@ -116,9 +100,6 @@ class ClubCrudService
         $this->em->flush();
     }
 
-    /**
-     * @return array<string, mixed>
-     */
     private function serialize(Club $club): array
     {
         return [

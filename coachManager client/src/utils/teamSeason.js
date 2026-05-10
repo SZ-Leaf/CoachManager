@@ -1,10 +1,5 @@
-/** À partir de juillet : nouvelle saison sportive (rentrée / licences FR courantes). */
 const SEASON_START_MONTH = 7;
 
-/**
- * @param {string|null|undefined} raw valeur API `YYYY-MM-DD`
- * @returns {string} année de début de saison sportive (ex. "2025"), ou ""
- */
 export function seasonApiValueToStartYear(raw) {
   if (raw == null || String(raw).trim() === '') {
     return '';
@@ -22,10 +17,6 @@ export function seasonApiValueToStartYear(raw) {
   return String(startYear);
 }
 
-/**
- * @param {string} startYearStr année de début (ex. "2025")
- * @returns {string} date canonique pour l’API (ex. "2025-07-01"), ou ""
- */
 export function startYearToSeasonApiValue(startYearStr) {
   const y = Number(startYearStr);
   if (!Number.isFinite(y) || y < 1900 || y > 2100) {
@@ -50,11 +41,6 @@ export function getDefaultSeasonStartYear() {
   return month >= SEASON_START_MONTH ? year : year - 1;
 }
 
-/**
- * Années proposées dans les formulaires : autour de la saison courante + saisons déjà présentes.
- * @param {Array<{ season?: string|null }>} teams
- * @returns {{ value: string, label: string }[]}
- */
 export function buildSeasonYearSelectOptions(teams = []) {
   const anchor = getDefaultSeasonStartYear();
   let minY = anchor;

@@ -15,9 +15,6 @@ class DeletePlayerService
     ) {
     }
 
-    /**
-     * @throws DeletePlayerException
-     */
     public function delete(User $coach, int $id): array
     {
         $player = $this->playerRepository->findOneByIdAndCoach($id, $coach);

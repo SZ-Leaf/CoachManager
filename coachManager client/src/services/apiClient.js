@@ -1,6 +1,3 @@
-/**
- * Same-origin `/api` in dev (Vite proxy). Production: serve SPA and API on one origin or set VITE_API_ORIGIN.
- */
 function apiOrigin() {
   if (typeof import.meta.env.VITE_API_ORIGIN === 'string' && import.meta.env.VITE_API_ORIGIN) {
     return import.meta.env.VITE_API_ORIGIN.replace(/\/$/, '');
@@ -13,20 +10,13 @@ export function buildApiUrl(path) {
   return `${apiOrigin()}${p}`;
 }
 
-/**
- * @param {string} path
- * @param {RequestInit & { body?: object | FormData }} [options]
- * @returns {Promise<any>}
- */
 export async function apiRequest(path, options = {}) {
   const { body, headers: hdr = {}, ...rest } = options;
-  /** @type {HeadersInit} */
   const headers = {
     Accept: 'application/json',
     ...hdr,
   };
 
-  /** @type {RequestInit} */
   const init = {
     credentials: 'include',
     ...rest,
@@ -50,7 +40,6 @@ export async function apiRequest(path, options = {}) {
 
   const text = await res.text();
 
-  /** @returns {any} */
   const parseJson = () => {
     if (!text) return null;
     try {

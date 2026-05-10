@@ -33,7 +33,6 @@ function localInputToIso(localString) {
   return d.toISOString();
 }
 
-/** Réponse API parfois en snake_case selon proxies / vieilles versions. */
 function normalizeRollRow(row) {
   if (!row || typeof row !== 'object') return null;
   const playerId = row.playerId ?? row.player_id;

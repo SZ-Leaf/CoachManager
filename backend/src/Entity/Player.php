@@ -262,9 +262,6 @@ class Player
         return $this;
     }
 
-    /**
-     * @return Collection<int, Attendance>
-     */
     public function getAttendances(): Collection
     {
         return $this->attendances;
@@ -291,9 +288,6 @@ class Player
         return $this;
     }
 
-    /**
-     * @return Collection<int, Communication>
-     */
     public function getCommunications(): Collection
     {
         return $this->communications;

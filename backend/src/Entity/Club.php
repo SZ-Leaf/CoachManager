@@ -135,9 +135,6 @@ class Club
         return $this;
     }
 
-    /**
-     * @return Collection<int, Team>
-     */
     public function getTeams(): Collection
     {
         return $this->teams;

@@ -20,10 +20,8 @@ export default function InventoryPage() {
   const [productName, setProductName] = useState('');
   const [productQty, setProductQty] = useState('1');
   const [msg, setMsg] = useState('');
-  /** @type {number | null} */
   const [editingListId, setEditingListId] = useState(null);
   const [renameDraft, setRenameDraft] = useState('');
-  /** @type {number | null} */
   const [editingProductId, setEditingProductId] = useState(null);
   const [productNameDraft, setProductNameDraft] = useState('');
   const [productQtyDraft, setProductQtyDraft] = useState('');
@@ -54,7 +52,6 @@ export default function InventoryPage() {
   const products = productsQuery.data?.items ?? [];
 
   const inventoryByTeamId = useMemo(() => {
-    /** @type {Record<string, number>} */
     const m = {};
     for (const inv of inventories) {
       const tid = inv.teamId;

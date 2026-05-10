@@ -13,9 +13,6 @@ class GetPlayerService
     ) {
     }
 
-    /**
-     * @throws GetPlayerException
-     */
     public function get(User $coach, int $id): array
     {
         $player = $this->playerRepository->findOneByIdAndCoach($id, $coach);

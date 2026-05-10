@@ -17,17 +17,11 @@ class TeamCrudService
     ) {
     }
 
-    /**
-     * @return list<array<string, mixed>>
-     */
     public function listForCoach(User $coach): array
     {
         return array_map(fn (Team $t) => $this->serialize($t), $this->teamRepository->findAllByCoach($coach));
     }
 
-    /**
-     * @return array<string, mixed>
-     */
     public function getForCoach(User $coach, int $id): array
     {
         $team = $this->teamRepository->findOneByIdAndCoach($id, $coach);
@@ -38,11 +32,6 @@ class TeamCrudService
         return $this->serialize($team);
     }
 
-    /**
-     * @param array{name: string, category?: ?string, season?: ?string, clubId?: ?int} $data
-     *
-     * @return array<string, mixed>
-     */
     public function create(User $coach, array $data): array
     {
         $name = trim($data['name'] ?? '');
@@ -75,11 +64,6 @@ class TeamCrudService
         return $this->serialize($team);
     }
 
-    /**
-     * @param array{name?: ?string, category?: ?string, season?: ?string, clubId?: mixed} $data
-     *
-     * @return array<string, mixed>
-     */
     public function update(User $coach, int $id, array $data): array
     {
         $team = $this->teamRepository->findOneByIdAndCoach($id, $coach);
@@ -133,9 +117,6 @@ class TeamCrudService
         $this->em->flush();
     }
 
-    /**
-     * @return array<string, mixed>
-     */
     private function serialize(Team $team): array
     {
         return [

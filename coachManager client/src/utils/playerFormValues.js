@@ -3,9 +3,6 @@ export function birthdayInputValue(iso) {
   return String(iso).slice(0, 10);
 }
 
-/**
- * @param {object|null|undefined} player
- */
 export function playerToFormInitialValues(player) {
   if (!player) {
     return {};

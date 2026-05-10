@@ -21,9 +21,6 @@ class UpdateUserService
     ) {
     }
 
-    /**
-     * @throws UpdateUserException
-     */
     public function updateForUser(User $user, UpdateUserRequest $dto, ?UploadedFile $avatarFile = null): array
     {
         $violations = $this->validator->validate($dto);

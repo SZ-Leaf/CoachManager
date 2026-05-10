@@ -1,4 +1,3 @@
-/** Valeurs API (inchangées en base) → libellés français pour l’affichage. */
 export const PLAYER_STATUSES = [
   { value: 'active', label: 'Actif' },
   { value: 'injured', label: 'Blessé' },

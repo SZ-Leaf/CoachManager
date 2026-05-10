@@ -23,9 +23,6 @@ class RegisterUserService
       private readonly AvatarUploadHandler $avatarUploadHandler,
    ) {}
 
-   /**
-    * @throws RegisterUserException
-    */
    public function registerUser(RegisterUserRequest $dto, ?UploadedFile $avatarFile = null): array
    {
       // DTO Validation
