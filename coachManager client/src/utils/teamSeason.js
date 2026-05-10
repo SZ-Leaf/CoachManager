@@ -1,4 +1,5 @@
-const SEASON_START_MONTH = 7;
+// début d'une nouvelle saison sportive = août 
+const SEASON_START_MONTH = 8;
 
 export function seasonApiValueToStartYear(raw) {
   if (raw == null || String(raw).trim() === '') {
