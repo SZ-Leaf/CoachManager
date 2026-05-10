@@ -9,6 +9,7 @@ import EmptyState from '../../../components/ui/feedback/EmptyState.jsx';
 import { ROUTES } from '../../../utils/routes.js';
 import { formatPlayerPosition } from '../../../utils/playerPosition.js';
 import { formatPlayerStatus } from '../../../utils/playerStatus.js';
+import { formatSeasonSportsRange } from '../../../utils/teamSeason.js';
 import './TeamDetailsPage.css';
 
 const TeamDetailsPage = () => {
@@ -35,7 +36,7 @@ const TeamDetailsPage = () => {
   return (
     <AppPage 
       title={`Équipe : ${team.name}`}
-      description={`${team.category || 'Sans catégorie'} — Saison ${team.season || 'N/A'}`}
+      description={`${team.category || 'Sans catégorie'} — Saison ${formatSeasonSportsRange(team.season) || 'N/A'}`}
       action={
         <div className="app-page__actions-row">
           <Link

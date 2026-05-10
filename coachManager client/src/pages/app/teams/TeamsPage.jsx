@@ -10,6 +10,12 @@ import * as clubApi from '../../../services/clubService.js';
 import AppPage from '../AppPage.jsx';
 import { Link } from 'react-router-dom';
 import { ROUTES } from '../../../utils/routes.js';
+import {
+  buildSeasonYearSelectOptions,
+  formatSeasonSportsRange,
+  seasonApiValueToStartYear,
+  startYearToSeasonApiValue,
+} from '../../../utils/teamSeason.js';
 
 const emptyForm = { name: '', category: '', season: '', clubId: '' };
 
@@ -22,27 +28,6 @@ function seasonKey(team) {
     return '';
   }
   return String(s).trim();
-}
-
-/** Saison API (souvent AAAA-MM-JJ) → libellé affichage liste / filtre */
-function formatSeasonOptionLabel(raw) {
-  if (!raw) {
-    return '';
-  }
-  const m = String(raw).match(/^(\d{4})-(\d{2})-(\d{2})/);
-  if (!m) {
-    return String(raw);
-  }
-  const [, y, mo, d] = m;
-  const dt = new Date(Number(y), Number(mo) - 1, Number(d));
-  if (Number.isNaN(dt.getTime())) {
-    return String(raw);
-  }
-  return dt.toLocaleDateString('fr-FR', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  });
 }
 
 export default function TeamsPage() {
@@ -112,6 +97,8 @@ export default function TeamsPage() {
   };
 
   const teams = teamsQuery.data?.items ?? [];
+
+  const seasonYearChoices = useMemo(() => buildSeasonYearSelectOptions(teams), [teams]);
 
   const categoryOptions = useMemo(() => {
     const seen = new Set();
@@ -199,7 +186,7 @@ export default function TeamsPage() {
                 ) : null}
                 {seasonOptions.map((raw) => (
                   <option key={raw} value={raw}>
-                    {formatSeasonOptionLabel(raw)}
+                    {formatSeasonSportsRange(raw)}
                   </option>
                 ))}
               </select>
@@ -247,7 +234,7 @@ export default function TeamsPage() {
                       </Link>
                     </td>
                     <td data-label="Catégorie">{t.category || '—'}</td>
-                    <td data-label="Saison">{formatSeasonOptionLabel(seasonKey(t)) || '—'}</td>
+                    <td data-label="Saison">{formatSeasonSportsRange(seasonKey(t)) || '—'}</td>
                     <td data-label="Club">{t.clubId ?? '—'}</td>
                     <td data-label="Actions" className="crud-table__actions crud-table__actions--split">
                       <div className="crud-table__actions-start">
@@ -317,12 +304,23 @@ export default function TeamsPage() {
             />
           </div>
           <div>
-            <label>Saison (AAAA-MM-JJ)</label>
-            <input
-              type="date"
-              value={form.season}
-              onChange={(e) => setForm({ ...form, season: e.target.value })}
-            />
+            <label>Saison sportive</label>
+            <select
+              value={seasonApiValueToStartYear(form.season)}
+              onChange={(e) =>
+                setForm({
+                  ...form,
+                  season: e.target.value ? startYearToSeasonApiValue(e.target.value) : '',
+                })
+              }
+            >
+              <option value="">—</option>
+              {seasonYearChoices.map(({ value, label }) => (
+                <option key={value} value={value}>
+                  {label}
+                </option>
+              ))}
+            </select>
           </div>
           <div>
             <label>Club</label>

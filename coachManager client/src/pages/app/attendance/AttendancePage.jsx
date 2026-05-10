@@ -7,6 +7,7 @@ import Alert from '../../../components/ui/feedback/Alert.jsx';
 import * as teamApi from '../../../services/teamService.js';
 import AppPage from '../AppPage.jsx';
 import { ROUTES } from '../../../utils/routes.js';
+import { formatSeasonSportsRange } from '../../../utils/teamSeason.js';
 import '../../../styles/pages/attendance-hub.css';
 
 export default function AttendancePage() {
@@ -47,7 +48,7 @@ export default function AttendancePage() {
                 <div className="attendance-hub__card-main">
                   <h2 className="attendance-hub__team-name">{t.name}</h2>
                   <p className="attendance-hub__team-meta">
-                    {[t.category, t.season].filter(Boolean).join(' · ') || 'Équipe'}
+                    {[t.category, formatSeasonSportsRange(t.season)].filter(Boolean).join(' · ') || 'Équipe'}
                   </p>
                 </div>
                 <div className="attendance-hub__card-actions">
