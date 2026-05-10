@@ -28,6 +28,88 @@ class AttendanceService
         );
     }
 
+    public function listRollCallSessionsForCoach(User $coach): array
+    {
+        $rows = $this->attendanceRepository->findAllForCoach($coach);
+        $groups = [];
+
+        foreach ($rows as $a) {
+            $player = $a->getPlayer();
+            $team = $player?->getTeam();
+            $date = $a->getDate();
+            if ($team === null || $date === null || $player === null || $player->getId() === null) {
+                continue;
+            }
+
+            $teamId = $team->getId();
+            if ($teamId === null) {
+                continue;
+            }
+
+            $sessionKey = $teamId.'|'.$date->format(\DateTimeInterface::ATOM);
+            if (!isset($groups[$sessionKey])) {
+                $groups[$sessionKey] = [
+                    'teamId' => $teamId,
+                    'teamName' => $team->getName(),
+                    'sessionAt' => $date->format(\DateTimeInterface::ATOM),
+                    'entries' => [],
+                ];
+            }
+
+            $groups[$sessionKey]['entries'][] = [
+                'attendanceId' => $a->getId(),
+                'playerId' => $player->getId(),
+                'firstname' => $player->getFirstname(),
+                'lastname' => $player->getLastname(),
+                'status' => $a->getStatus()?->value,
+            ];
+        }
+
+        foreach ($groups as &$g) {
+            usort(
+                $g['entries'],
+                static fn (array $x, array $y): int => [$x['lastname'], $x['firstname']] <=> [$y['lastname'], $y['firstname']]
+            );
+            $g['counts'] = $this->countStatuses($g['entries']);
+        }
+        unset($g);
+
+        $sessions = array_values($groups);
+        usort(
+            $sessions,
+            static fn (array $a, array $b): int => strcmp($b['sessionAt'], $a['sessionAt'])
+        );
+
+        return ['sessions' => $sessions];
+    }
+
+    private function countStatuses(array $entries): array
+    {
+        $out = [
+            'present' => 0,
+            'absent' => 0,
+            'late' => 0,
+            'excused' => 0,
+            'unset' => 0,
+        ];
+        foreach ($entries as $e) {
+            $s = $e['status'] ?? '';
+            if ($s === '') {
+                ++$out['unset'];
+
+                continue;
+            }
+            if (!isset($out[$s])) {
+                ++$out['unset'];
+
+                continue;
+            }
+            ++$out[$s];
+        }
+
+        return $out;
+    }
+
     public function getForCoach(User $coach, int $id): array
     {
         $a = $this->attendanceRepository->findOneByIdForCoach($id, $coach);

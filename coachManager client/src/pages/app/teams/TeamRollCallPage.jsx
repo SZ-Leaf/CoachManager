@@ -10,15 +10,9 @@ import * as playerApi from '../../../services/playerService.js';
 import * as teamApi from '../../../services/teamService.js';
 import AppPage from '../AppPage.jsx';
 import { ROUTES } from '../../../utils/routes.js';
+import { ATTENDANCE_STATUS_OPTIONS } from '../../../utils/attendanceStatuses.js';
 import { formatPlayerPosition } from '../../../utils/playerPosition.js';
 import './TeamRollCallPage.css';
-
-const STATUS_OPTIONS = [
-  { value: 'present', label: 'Présent' },
-  { value: 'absent', label: 'Absent' },
-  { value: 'late', label: 'En retard' },
-  { value: 'excused', label: 'Excusé' },
-];
 
 function defaultLocalSession() {
   const d = new Date();
@@ -331,7 +325,7 @@ export default function TeamRollCallPage() {
                               }))
                             }
                           >
-                            {STATUS_OPTIONS.filter((o) => o.value !== 'present').map((o) => (
+                            {ATTENDANCE_STATUS_OPTIONS.filter((o) => o.value !== 'present').map((o) => (
                               <option key={o.value} value={o.value}>
                                 {o.label}
                               </option>

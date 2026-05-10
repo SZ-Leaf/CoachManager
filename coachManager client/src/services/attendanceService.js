@@ -9,6 +9,8 @@ function normalizeNumericTeamId(teamId) {
 }
 
 export const fetchAttendances = () => apiRequest('/api/attendances');
+export const fetchRollCallSessions = () =>
+  apiRequest('/api/teams/roll-call-sessions');
 export const fetchAttendance = (id) => apiRequest(`/api/attendances/${id}`);
 export const createAttendance = (body) =>
   apiRequest('/api/attendances', { method: 'POST', body });

@@ -23,7 +23,7 @@ export default defineConfig(({ mode }) => {
               const url = req.url ?? '';
               if (
                 proxyRes.statusCode === 404 &&
-                url.includes('roll-call')
+                (url.includes('roll-call') || url.includes('roll-call-sessions'))
               ) {
                 console.warn(
                   `\n[vite] 404 sur ${url} — le backend sur ${backend} n’expose pas cette route (code obsolète ou mauvais projet). ` +

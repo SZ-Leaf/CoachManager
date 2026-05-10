@@ -25,6 +25,16 @@ final class TeamController extends AbstractController
         return $this->json(['items' => $teams->listForCoach($user)]);
     }
 
+    #[Route('/roll-call-sessions', name: 'roll_call_sessions', methods: ['GET'])]
+    public function rollCallSessions(#[CurrentUser] ?User $user, AttendanceService $attendanceService): JsonResponse
+    {
+        if ($user === null) {
+            return $this->json(['message' => 'Unauthenticated'], Response::HTTP_UNAUTHORIZED);
+        }
+
+        return $this->json($attendanceService->listRollCallSessionsForCoach($user));
+    }
+
     #[Route('/{id}', name: 'get', requirements: ['id' => '\d+'], methods: ['GET'])]
     public function getOne(int $id, #[CurrentUser] ?User $user, TeamCrudService $teams): JsonResponse
     {
