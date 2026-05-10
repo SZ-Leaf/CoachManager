@@ -1,63 +1,75 @@
-import { useState } from 'react';
+import Alert from '../../feedback/Alert.jsx';
+import {
+  seasonApiValueToStartYear,
+  startYearToSeasonApiValue,
+} from '../../../../utils/teamSeason.js';
 
-const TeamForm = () => {
-  const [formData, setFormData] = useState({
-    name: '',
-    category: '',
-    season: '',
-  });
-
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log(formData);
-  };
-
+export default function TeamForm({
+  form,
+  setForm,
+  seasonYearChoices,
+  clubs,
+  formError,
+  isPending,
+  onSubmit,
+}) {
   return (
-    <form className="team-form" onSubmit={handleSubmit}>
-      <h2>Gestion de l'Équipe</h2>
-
+    <form
+      className="app-form"
+      onSubmit={(e) => {
+        e.preventDefault();
+        onSubmit();
+      }}
+    >
+      {formError ? <Alert variant="error">{formError}</Alert> : null}
       <div>
-        <label htmlFor="name">Nom de l'équipe</label>
+        <label>Nom</label>
         <input
-          id="name"
-          type="text"
-          name="name"
-          value={formData.name}
-          onChange={handleChange}
+          value={form.name}
+          onChange={(e) => setForm({ ...form, name: e.target.value })}
           required
         />
       </div>
-
       <div>
-        <label htmlFor="category">Catégorie</label>
+        <label>Catégorie</label>
         <input
-          id="category"
-          type="text"
-          name="category"
-          value={formData.category}
-          onChange={handleChange}
-          placeholder="Ex: U17, Senior, Féminine..."
+          value={form.category}
+          onChange={(e) => setForm({ ...form, category: e.target.value })}
         />
       </div>
-
       <div>
-        <label htmlFor="season">Saison</label>
-        <input
-          id="season"
-          type="date"
-          name="season"
-          value={formData.season}
-          onChange={handleChange}
-        />
+        <label>Saison sportive</label>
+        <select
+          value={seasonApiValueToStartYear(form.season)}
+          onChange={(e) =>
+            setForm({
+              ...form,
+              season: e.target.value ? startYearToSeasonApiValue(e.target.value) : '',
+            })
+          }
+        >
+          <option value="">—</option>
+          {seasonYearChoices.map(({ value, label }) => (
+            <option key={value} value={value}>
+              {label}
+            </option>
+          ))}
+        </select>
       </div>
-
-      <button type="submit">Enregistrer</button>
+      <div>
+        <label>Club</label>
+        <select value={form.clubId} onChange={(e) => setForm({ ...form, clubId: e.target.value })}>
+          <option value="">—</option>
+          {clubs.map((c) => (
+            <option key={c.id} value={c.id}>
+              {c.name}
+            </option>
+          ))}
+        </select>
+      </div>
+      <button type="submit" className="btn btn-primary" disabled={isPending}>
+        {isPending ? 'Enregistrement…' : 'Enregistrer'}
+      </button>
     </form>
   );
-};
-
-export default TeamForm;
+}

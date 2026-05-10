@@ -1,31 +1,21 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 
+import { CrudListShell } from '../../../components/common/index.js';
 import Modal from '../../../components/ui/modals/Modal.jsx';
-import Alert from '../../../components/ui/feedback/Alert.jsx';
+import ClubForm from '../../../components/ui/forms/club/ClubForm.jsx';
 import EmptyState from '../../../components/ui/feedback/EmptyState.jsx';
-import Spinner from '../../../components/ui/feedback/Spinner.jsx';
 import * as clubApi from '../../../services/clubService.js';
 import AppPage from '../AppPage.jsx';
-
-const DISCIPLINES = [
-  'football',
-  'basketball',
-  'rugby',
-  'tennis',
-  'volleyball',
-  'handball',
-  'other',
-];
+import { useCrudModal } from '../../../hooks/useCrudModal.js';
 
 const emptyForm = { name: '', discipline: '', logo: '', description: '' };
 
 export default function ClubPage() {
   const qc = useQueryClient();
-  const [modalOpen, setModalOpen] = useState(false);
+  const modal = useCrudModal();
   const [editing, setEditing] = useState(null);
   const [form, setForm] = useState(emptyForm);
-  const [formError, setFormError] = useState('');
 
   const clubsQuery = useQuery({
     queryKey: ['clubs'],
@@ -47,12 +37,11 @@ export default function ClubPage() {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['clubs'] });
-      setModalOpen(false);
+      modal.closeModal();
       setEditing(null);
       setForm(emptyForm);
-      setFormError('');
     },
-    onError: (e) => setFormError(e.message || 'Erreur'),
+    onError: (e) => modal.setFormError(e.message || 'Erreur'),
   });
 
   const deleteMutation = useMutation({
@@ -63,8 +52,7 @@ export default function ClubPage() {
   const openCreate = () => {
     setEditing(null);
     setForm(emptyForm);
-    setFormError('');
-    setModalOpen(true);
+    modal.openModal();
   };
 
   const openEdit = (club) => {
@@ -75,17 +63,13 @@ export default function ClubPage() {
       logo: club.logo || '',
       description: club.description || '',
     });
-    setFormError('');
-    setModalOpen(true);
+    modal.openModal();
   };
 
   const clubs = clubsQuery.data?.items ?? [];
 
   return (
-    <AppPage
-      title="Club"
-      description="Vos clubs (créés par vous) pour rattacher des équipes."
-    >
+    <AppPage title="Club" description="Vos clubs (créés par vous) pour rattacher des équipes.">
       <div className="crud-page">
         <div className="crud-toolbar">
           <button type="button" className="btn btn-primary" onClick={openCreate}>
@@ -93,19 +77,17 @@ export default function ClubPage() {
           </button>
         </div>
 
-        {clubsQuery.isLoading ? <Spinner /> : null}
-        {clubsQuery.error ? (
-          <Alert variant="error">{clubsQuery.error.message}</Alert>
-        ) : null}
-
-        {!clubsQuery.isLoading && clubs.length === 0 ? (
-          <EmptyState
-            title="Aucun club"
-            description="Créez un club puis associez-le à une équipe."
-          />
-        ) : null}
-
-        {clubs.length > 0 ? (
+        <CrudListShell
+          isLoading={clubsQuery.isLoading}
+          error={clubsQuery.error}
+          whenInitialEmpty={clubs.length === 0}
+          initialEmptyContent={
+            <EmptyState title="Aucun club" description="Créez un club puis associez-le à une équipe." />
+          }
+          whenFilteredEmpty={false}
+          filteredEmptyContent={null}
+          hasRows={clubs.length > 0}
+        >
           <div className="crud-table-wrap">
             <table className="crud-table">
               <thead>
@@ -141,63 +123,21 @@ export default function ClubPage() {
               </tbody>
             </table>
           </div>
-        ) : null}
+        </CrudListShell>
       </div>
 
       <Modal
-        isOpen={modalOpen}
-        onClose={() => setModalOpen(false)}
+        isOpen={modal.isOpen}
+        onClose={modal.closeModal}
         title={editing ? 'Modifier le club' : 'Nouveau club'}
       >
-        <form
-          className="app-form"
-          onSubmit={(e) => {
-            e.preventDefault();
-            saveMutation.mutate();
-          }}
-        >
-          {formError ? <Alert variant="error">{formError}</Alert> : null}
-          <div>
-            <label>Nom *</label>
-            <input
-              value={form.name}
-              onChange={(e) => setForm({ ...form, name: e.target.value })}
-              required
-            />
-          </div>
-          <div>
-            <label>Discipline</label>
-            <select
-              value={form.discipline}
-              onChange={(e) => setForm({ ...form, discipline: e.target.value })}
-            >
-              <option value="">—</option>
-              {DISCIPLINES.map((d) => (
-                <option key={d} value={d}>
-                  {d}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <label>Logo (URL)</label>
-            <input
-              value={form.logo}
-              onChange={(e) => setForm({ ...form, logo: e.target.value })}
-            />
-          </div>
-          <div>
-            <label>Description</label>
-            <textarea
-              rows={3}
-              value={form.description}
-              onChange={(e) => setForm({ ...form, description: e.target.value })}
-            />
-          </div>
-          <button type="submit" className="btn btn-primary" disabled={saveMutation.isPending}>
-            {saveMutation.isPending ? 'Enregistrement…' : 'Enregistrer'}
-          </button>
-        </form>
+        <ClubForm
+          form={form}
+          setForm={setForm}
+          formError={modal.formError}
+          isPending={saveMutation.isPending}
+          onSubmit={() => saveMutation.mutate()}
+        />
       </Modal>
     </AppPage>
   );

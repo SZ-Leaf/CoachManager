@@ -1,13 +1,14 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 
+import { CrudListShell } from '../../../components/common/index.js';
 import Modal from '../../../components/ui/modals/Modal.jsx';
-import Alert from '../../../components/ui/feedback/Alert.jsx';
+import MessageForm from '../../../components/ui/forms/communication/MessageForm.jsx';
 import EmptyState from '../../../components/ui/feedback/EmptyState.jsx';
-import Spinner from '../../../components/ui/feedback/Spinner.jsx';
 import * as messagesApi from '../../../services/messagesService.js';
 import * as playerApi from '../../../services/playerService.js';
 import AppPage from '../AppPage.jsx';
+import { useCrudModal } from '../../../hooks/useCrudModal.js';
 
 const empty = {
   playerId: '',
@@ -20,10 +21,9 @@ const empty = {
 
 export default function MessagesPage() {
   const qc = useQueryClient();
-  const [modalOpen, setModalOpen] = useState(false);
+  const modal = useCrudModal();
   const [editingId, setEditingId] = useState(null);
   const [form, setForm] = useState(empty);
-  const [formError, setFormError] = useState('');
 
   const playersQuery = useQuery({
     queryKey: ['players'],
@@ -52,12 +52,11 @@ export default function MessagesPage() {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['messages'] });
-      setModalOpen(false);
+      modal.closeModal();
       setEditingId(null);
       setForm(empty);
-      setFormError('');
     },
-    onError: (e) => setFormError(e.message),
+    onError: (e) => modal.setFormError(e.message),
   });
 
   const deleteMutation = useMutation({
@@ -68,8 +67,7 @@ export default function MessagesPage() {
   const openCreate = () => {
     setEditingId(null);
     setForm(empty);
-    setFormError('');
-    setModalOpen(true);
+    modal.openModal();
   };
 
   const openEdit = (row) => {
@@ -82,8 +80,7 @@ export default function MessagesPage() {
       body: row.body || '',
       status: row.status || '',
     });
-    setFormError('');
-    setModalOpen(true);
+    modal.openModal();
   };
 
   const rows = listQuery.data?.items ?? [];
@@ -98,16 +95,15 @@ export default function MessagesPage() {
           </button>
         </div>
 
-        {listQuery.isLoading ? <Spinner /> : null}
-        {listQuery.error ? (
-          <Alert variant="error">{listQuery.error.message}</Alert>
-        ) : null}
-
-        {!listQuery.isLoading && rows.length === 0 ? (
-          <EmptyState title="Aucun message" />
-        ) : null}
-
-        {rows.length > 0 ? (
+        <CrudListShell
+          isLoading={listQuery.isLoading}
+          error={listQuery.error}
+          whenInitialEmpty={rows.length === 0}
+          initialEmptyContent={<EmptyState title="Aucun message" />}
+          whenFilteredEmpty={false}
+          filteredEmptyContent={null}
+          hasRows={rows.length > 0}
+        >
           <div className="crud-table-wrap">
             <table className="crud-table">
               <thead>
@@ -145,89 +141,22 @@ export default function MessagesPage() {
               </tbody>
             </table>
           </div>
-        ) : null}
+        </CrudListShell>
       </div>
 
       <Modal
-        isOpen={modalOpen}
-        onClose={() => setModalOpen(false)}
+        isOpen={modal.isOpen}
+        onClose={modal.closeModal}
         title={editingId ? 'Modifier le message' : 'Nouveau message'}
       >
-        <form
-          className="app-form"
-          onSubmit={(e) => {
-            e.preventDefault();
-            saveMutation.mutate();
-          }}
-        >
-          {formError ? <Alert variant="error">{formError}</Alert> : null}
-          <div>
-            <label>Joueur *</label>
-            <select
-              value={form.playerId}
-              onChange={(e) => setForm({ ...form, playerId: e.target.value })}
-              required
-            >
-              <option value="">—</option>
-              {players.map((p) => (
-                <option key={p.id} value={p.id}>
-                  {p.firstname} {p.lastname}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <label>Destinataire</label>
-            <select
-              value={form.recipientType}
-              onChange={(e) =>
-                setForm({ ...form, recipientType: e.target.value })
-              }
-            >
-              <option value="player">Joueur</option>
-              <option value="emergency">Urgence</option>
-            </select>
-          </div>
-          <div>
-            <label>Email destinataire</label>
-            <input
-              type="email"
-              value={form.recipientEmail}
-              onChange={(e) =>
-                setForm({ ...form, recipientEmail: e.target.value })
-              }
-            />
-          </div>
-          <div>
-            <label>Sujet</label>
-            <input
-              value={form.subject}
-              onChange={(e) => setForm({ ...form, subject: e.target.value })}
-            />
-          </div>
-          <div>
-            <label>Corps</label>
-            <textarea
-              rows={4}
-              value={form.body}
-              onChange={(e) => setForm({ ...form, body: e.target.value })}
-            />
-          </div>
-          <div>
-            <label>Statut</label>
-            <select
-              value={form.status}
-              onChange={(e) => setForm({ ...form, status: e.target.value })}
-            >
-              <option value="">—</option>
-              <option value="sent">Envoyé</option>
-              <option value="failed">Échec</option>
-            </select>
-          </div>
-          <button type="submit" className="btn btn-primary" disabled={saveMutation.isPending}>
-            Enregistrer
-          </button>
-        </form>
+        <MessageForm
+          form={form}
+          setForm={setForm}
+          players={players}
+          formError={modal.formError}
+          isPending={saveMutation.isPending}
+          onSubmit={() => saveMutation.mutate()}
+        />
       </Modal>
     </AppPage>
   );

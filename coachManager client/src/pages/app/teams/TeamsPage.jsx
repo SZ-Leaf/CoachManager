@@ -1,10 +1,10 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useMemo, useState } from 'react';
 
+import { CrudListShell, CrudToolbarStrip } from '../../../components/common/index.js';
 import Modal from '../../../components/ui/modals/Modal.jsx';
-import Alert from '../../../components/ui/feedback/Alert.jsx';
 import EmptyState from '../../../components/ui/feedback/EmptyState.jsx';
-import Spinner from '../../../components/ui/feedback/Spinner.jsx';
+import TeamForm from '../../../components/ui/forms/team/TeamForm.jsx';
 import * as teamApi from '../../../services/teamService.js';
 import * as clubApi from '../../../services/clubService.js';
 import AppPage from '../AppPage.jsx';
@@ -13,9 +13,8 @@ import { ROUTES } from '../../../utils/routes.js';
 import {
   buildSeasonYearSelectOptions,
   formatSeasonSportsRange,
-  seasonApiValueToStartYear,
-  startYearToSeasonApiValue,
 } from '../../../utils/teamSeason.js';
+import { useCrudModal } from '../../../hooks/useCrudModal.js';
 
 const emptyForm = { name: '', category: '', season: '', clubId: '' };
 
@@ -32,10 +31,9 @@ function seasonKey(team) {
 
 export default function TeamsPage() {
   const qc = useQueryClient();
-  const [modalOpen, setModalOpen] = useState(false);
+  const modal = useCrudModal();
   const [editing, setEditing] = useState(null);
   const [form, setForm] = useState(emptyForm);
-  const [formError, setFormError] = useState('');
   const [filterCategory, setFilterCategory] = useState('');
   const [filterSeason, setFilterSeason] = useState('');
 
@@ -64,12 +62,11 @@ export default function TeamsPage() {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['teams'] });
-      setModalOpen(false);
+      modal.closeModal();
       setEditing(null);
       setForm(emptyForm);
-      setFormError('');
     },
-    onError: (e) => setFormError(e.message || 'Erreur'),
+    onError: (e) => modal.setFormError(e.message || 'Erreur'),
   });
 
   const deleteMutation = useMutation({
@@ -80,8 +77,7 @@ export default function TeamsPage() {
   const openCreate = () => {
     setEditing(null);
     setForm(emptyForm);
-    setFormError('');
-    setModalOpen(true);
+    modal.openModal();
   };
 
   const openEdit = (team) => {
@@ -92,11 +88,11 @@ export default function TeamsPage() {
       season: team.season || '',
       clubId: team.clubId ? String(team.clubId) : '',
     });
-    setFormError('');
-    setModalOpen(true);
+    modal.openModal();
   };
 
   const teams = teamsQuery.data?.items ?? [];
+  const clubs = clubsQuery.data?.items ?? [];
 
   const seasonYearChoices = useMemo(() => buildSeasonYearSelectOptions(teams), [teams]);
 
@@ -156,13 +152,10 @@ export default function TeamsPage() {
   };
 
   return (
-    <AppPage
-      title="Équipes"
-      description="Créez et gérez vos équipes, catégories et saison."
-    >
+    <AppPage title="Équipes" description="Créez et gérez vos équipes, catégories et saison.">
       <div className="teams-page crud-page">
-        <div className="crud-toolbar teams-page__toolbar">
-          <div className="teams-page__toolbar-strip">
+        <div className="crud-toolbar crud-toolbar--full-width">
+          <CrudToolbarStrip showReset={hasActiveFilters} onReset={resetFilters}>
             <button type="button" className="btn btn-primary" onClick={openCreate}>
               + Nouvelle équipe
             </button>
@@ -198,56 +191,25 @@ export default function TeamsPage() {
                     </option>
                   ))}
                 </select>
-                {hasActiveFilters ? (
-                  <button
-                    type="button"
-                    className="btn btn-secondary teams-page__reset-btn"
-                    onClick={resetFilters}
-                    aria-label="Réinitialiser les filtres"
-                    title="Réinitialiser les filtres"
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="16"
-                      height="16"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      aria-hidden="true"
-                    >
-                      <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
-                      <path d="M3 3v5h5" />
-                    </svg>
-                  </button>
-                ) : null}
               </>
             ) : null}
-          </div>
+          </CrudToolbarStrip>
         </div>
 
-        {teamsQuery.isLoading ? <Spinner /> : null}
-        {teamsQuery.error ? (
-          <Alert variant="error">{teamsQuery.error.message}</Alert>
-        ) : null}
-
-        {!teamsQuery.isLoading && teams.length === 0 ? (
-          <EmptyState
-            title="Aucune équipe"
-            description="Créez une équipe pour commencer."
-          />
-        ) : null}
-
-        {!teamsQuery.isLoading && teams.length > 0 && filteredTeams.length === 0 ? (
-          <EmptyState
-            title="Aucun résultat"
-            description="Aucune équipe ne correspond aux filtres sélectionnés."
-          />
-        ) : null}
-
-        {filteredTeams.length > 0 ? (
+        <CrudListShell
+          isLoading={teamsQuery.isLoading}
+          error={teamsQuery.error}
+          whenInitialEmpty={teams.length === 0}
+          initialEmptyContent={<EmptyState title="Aucune équipe" description="Créez une équipe pour commencer." />}
+          whenFilteredEmpty={teams.length > 0 && filteredTeams.length === 0}
+          filteredEmptyContent={
+            <EmptyState
+              title="Aucun résultat"
+              description="Aucune équipe ne correspond aux filtres sélectionnés."
+            />
+          }
+          hasRows={filteredTeams.length > 0}
+        >
           <div className="crud-table-wrap">
             <table className="crud-table">
               <thead>
@@ -304,76 +266,23 @@ export default function TeamsPage() {
               </tbody>
             </table>
           </div>
-        ) : null}
+        </CrudListShell>
       </div>
 
       <Modal
-        isOpen={modalOpen}
-        onClose={() => setModalOpen(false)}
+        isOpen={modal.isOpen}
+        onClose={modal.closeModal}
         title={editing ? 'Modifier l’équipe' : 'Nouvelle équipe'}
       >
-        <form
-          className="app-form"
-          onSubmit={(e) => {
-            e.preventDefault();
-            saveMutation.mutate();
-          }}
-        >
-          {formError ? (
-            <Alert variant="error">{formError}</Alert>
-          ) : null}
-          <div>
-            <label>Nom</label>
-            <input
-              value={form.name}
-              onChange={(e) => setForm({ ...form, name: e.target.value })}
-              required
-            />
-          </div>
-          <div>
-            <label>Catégorie</label>
-            <input
-              value={form.category}
-              onChange={(e) => setForm({ ...form, category: e.target.value })}
-            />
-          </div>
-          <div>
-            <label>Saison sportive</label>
-            <select
-              value={seasonApiValueToStartYear(form.season)}
-              onChange={(e) =>
-                setForm({
-                  ...form,
-                  season: e.target.value ? startYearToSeasonApiValue(e.target.value) : '',
-                })
-              }
-            >
-              <option value="">—</option>
-              {seasonYearChoices.map(({ value, label }) => (
-                <option key={value} value={value}>
-                  {label}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <label>Club</label>
-            <select
-              value={form.clubId}
-              onChange={(e) => setForm({ ...form, clubId: e.target.value })}
-            >
-              <option value="">—</option>
-              {(clubsQuery.data?.items ?? []).map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.name}
-                </option>
-              ))}
-            </select>
-          </div>
-          <button type="submit" className="btn btn-primary" disabled={saveMutation.isPending}>
-            {saveMutation.isPending ? 'Enregistrement…' : 'Enregistrer'}
-          </button>
-        </form>
+        <TeamForm
+          form={form}
+          setForm={setForm}
+          seasonYearChoices={seasonYearChoices}
+          clubs={clubs}
+          formError={modal.formError}
+          isPending={saveMutation.isPending}
+          onSubmit={() => saveMutation.mutate()}
+        />
       </Modal>
     </AppPage>
   );

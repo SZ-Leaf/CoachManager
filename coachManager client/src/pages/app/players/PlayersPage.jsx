@@ -1,11 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useMemo, useState } from 'react';
 
+import { CrudListShell, CrudToolbarStrip } from '../../../components/common/index.js';
 import Modal from '../../../components/ui/modals/Modal.jsx';
 import Alert from '../../../components/ui/feedback/Alert.jsx';
 import EmptyState from '../../../components/ui/feedback/EmptyState.jsx';
-import Spinner from '../../../components/ui/feedback/Spinner.jsx';
 import PlayerForm from '../../../components/ui/forms/player/PlayerForm.jsx';
+import { useCrudModal } from '../../../hooks/useCrudModal.js';
 import * as playerApi from '../../../services/playerService.js';
 import * as teamApi from '../../../services/teamService.js';
 import AppPage from '../AppPage.jsx';
@@ -25,10 +26,9 @@ function comparePlayersByName(a, b) {
 
 export default function PlayersPage() {
   const qc = useQueryClient();
-  const [modalOpen, setModalOpen] = useState(false);
+  const modal = useCrudModal();
   const [editingId, setEditingId] = useState(null);
   const [detail, setDetail] = useState(null);
-  const [formError, setFormError] = useState('');
   const [nameSort, setNameSort] = useState('asc');
   const [filterPosition, setFilterPosition] = useState('');
   const [filterStatus, setFilterStatus] = useState('');
@@ -48,20 +48,17 @@ export default function PlayersPage() {
 
   const saveMutation = useMutation({
     mutationFn: (payload) =>
-      editingId
-        ? playerApi.updatePlayer(editingId, payload)
-        : playerApi.createPlayer(payload),
+      editingId ? playerApi.updatePlayer(editingId, payload) : playerApi.createPlayer(payload),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['players'] });
       if (editingId != null) {
         qc.invalidateQueries({ queryKey: ['player', String(editingId)] });
       }
-      setModalOpen(false);
+      modal.closeModal();
       setEditingId(null);
       setDetail(null);
-      setFormError('');
     },
-    onError: (e) => setFormError(e.message || 'Erreur'),
+    onError: (e) => modal.setFormError(e.message || 'Erreur'),
   });
 
   const deleteMutation = useMutation({
@@ -72,19 +69,18 @@ export default function PlayersPage() {
   const openCreate = () => {
     setEditingId(null);
     setDetail({});
-    setFormError('');
-    setModalOpen(true);
+    modal.openModal();
   };
 
   const openEdit = async (id) => {
-    setFormError('');
+    modal.setFormError('');
     setEditingId(id);
     try {
       const res = await playerApi.fetchPlayer(id);
       setDetail(res.player);
-      setModalOpen(true);
+      modal.openModal();
     } catch (e) {
-      setFormError(e.message);
+      modal.setFormError(e.message);
     }
   };
 
@@ -121,13 +117,10 @@ export default function PlayersPage() {
   };
 
   return (
-    <AppPage
-      title="Joueurs"
-      description="Fiches joueurs liées à vos équipes."
-    >
+    <AppPage title="Joueurs" description="Fiches joueurs liées à vos équipes.">
       <div className="players-page crud-page">
-        <div className="crud-toolbar players-page__toolbar">
-          <div className="players-page__toolbar-strip">
+        <div className="crud-toolbar crud-toolbar--full-width">
+          <CrudToolbarStrip showReset={hasActiveFilters} onReset={resetFilters}>
             <button type="button" className="btn btn-primary" onClick={openCreate}>
               + Nouveau joueur
             </button>
@@ -175,54 +168,25 @@ export default function PlayersPage() {
                 </option>
               ))}
             </select>
-            {hasActiveFilters ? (
-              <button
-                type="button"
-                className="btn btn-secondary players-page__reset-btn"
-                onClick={resetFilters}
-                aria-label="Réinitialiser les filtres"
-                title="Réinitialiser les filtres"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  aria-hidden="true"
-                >
-                  <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
-                  <path d="M3 3v5h5" />
-                </svg>
-              </button>
-            ) : null}
-          </div>
+          </CrudToolbarStrip>
         </div>
 
-        {playersQuery.isLoading ? <Spinner /> : null}
-        {playersQuery.error ? (
-          <Alert variant="error">{playersQuery.error.message}</Alert>
-        ) : null}
-
-        {!playersQuery.isLoading && players.length === 0 ? (
-          <EmptyState
-            title="Aucun joueur"
-            description="Ajoutez un joueur à l’une de vos équipes."
-          />
-        ) : null}
-
-        {!playersQuery.isLoading && players.length > 0 && filteredPlayers.length === 0 ? (
-          <EmptyState
-            title="Aucun résultat"
-            description="Aucun joueur ne correspond aux filtres sélectionnés."
-          />
-        ) : null}
-
-        {filteredPlayers.length > 0 ? (
+        <CrudListShell
+          isLoading={playersQuery.isLoading}
+          error={playersQuery.error}
+          whenInitialEmpty={players.length === 0}
+          initialEmptyContent={
+            <EmptyState title="Aucun joueur" description="Ajoutez un joueur à l’une de vos équipes." />
+          }
+          whenFilteredEmpty={players.length > 0 && filteredPlayers.length === 0}
+          filteredEmptyContent={
+            <EmptyState
+              title="Aucun résultat"
+              description="Aucun joueur ne correspond aux filtres sélectionnés."
+            />
+          }
+          hasRows={filteredPlayers.length > 0}
+        >
           <div className="crud-table-wrap">
             <table className="crud-table">
               <thead>
@@ -251,7 +215,10 @@ export default function PlayersPage() {
                     <td data-label="Statut">{formatPlayerStatus(p.status) || '—'}</td>
                     <td data-label="Actions" className="crud-table__actions crud-table__actions--split">
                       <div className="crud-table__actions-start">
-                        <Link to={ROUTES.PLAYER_DETAILS.replace(':id', p.id)} className="btn btn-secondary btn-compact">
+                        <Link
+                          to={ROUTES.PLAYER_DETAILS.replace(':id', p.id)}
+                          className="btn btn-secondary btn-compact"
+                        >
                           Détails
                         </Link>
                       </div>
@@ -277,15 +244,15 @@ export default function PlayersPage() {
               </tbody>
             </table>
           </div>
-        ) : null}
+        </CrudListShell>
       </div>
 
       <Modal
-        isOpen={modalOpen}
-        onClose={() => setModalOpen(false)}
+        isOpen={modal.isOpen}
+        onClose={modal.closeModal}
         title={editingId ? 'Modifier le joueur' : 'Nouveau joueur'}
       >
-        {formError ? <Alert variant="error">{formError}</Alert> : null}
+        {modal.formError ? <Alert variant="error">{modal.formError}</Alert> : null}
         <PlayerForm
           teams={teams}
           initialValues={initialValues}

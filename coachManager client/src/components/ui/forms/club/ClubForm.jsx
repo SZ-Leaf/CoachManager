@@ -1,81 +1,62 @@
-import { useState } from 'react';
+import Alert from '../../feedback/Alert.jsx';
 
-const DISCIPLINES = ['football', 'basketball', 'rugby', 'tennis', 'volleyball', 'handball', 'other'];
+export const CLUB_DISCIPLINE_OPTIONS = [
+  'football',
+  'basketball',
+  'rugby',
+  'tennis',
+  'volleyball',
+  'handball',
+  'other',
+];
 
-const ClubForm = () => {
-  const [formData, setFormData] = useState({
-    name: '',
-    discipline: '',
-    logo: '',
-    description: '',
-  });
-
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log(formData);
-  };
-
+export default function ClubForm({ form, setForm, formError, isPending, onSubmit }) {
   return (
-    <form className="club-form" onSubmit={handleSubmit}>
-      <h2>Paramètres du Club</h2>
-
+    <form
+      className="app-form"
+      onSubmit={(e) => {
+        e.preventDefault();
+        onSubmit();
+      }}
+    >
+      {formError ? <Alert variant="error">{formError}</Alert> : null}
       <div>
-        <label htmlFor="name">Nom du club</label>
+        <label>Nom *</label>
         <input
-          id="name"
-          type="text"
-          name="name"
-          value={formData.name}
-          onChange={handleChange}
+          value={form.name}
+          onChange={(e) => setForm({ ...form, name: e.target.value })}
           required
         />
       </div>
-
       <div>
-        <label htmlFor="discipline">Discipline</label>
+        <label>Discipline</label>
         <select
-          id="discipline"
-          name="discipline"
-          value={formData.discipline}
-          onChange={handleChange}
-          required
+          value={form.discipline}
+          onChange={(e) => setForm({ ...form, discipline: e.target.value })}
         >
-          <option value="">-- Sélectionner --</option>
-          {DISCIPLINES.map((d) => (
-            <option key={d} value={d}>{d}</option>
+          <option value="">—</option>
+          {CLUB_DISCIPLINE_OPTIONS.map((d) => (
+            <option key={d} value={d}>
+              {d}
+            </option>
           ))}
         </select>
       </div>
-
       <div>
-        <label htmlFor="logo">Logo (URL)</label>
-        <input
-          id="logo"
-          type="text"
-          name="logo"
-          value={formData.logo}
-          onChange={handleChange}
-        />
+        <label>Logo (URL)</label>
+        <input value={form.logo} onChange={(e) => setForm({ ...form, logo: e.target.value })} />
       </div>
-
       <div>
-        <label htmlFor="description">Description</label>
+        <label>Description</label>
         <textarea
-          id="description"
-          name="description"
-          value={formData.description}
-          onChange={handleChange}
-          rows={4}
+          rows={3}
+          value={form.description}
+          onChange={(e) => setForm({ ...form, description: e.target.value })}
         />
       </div>
-
-      <button type="submit">Enregistrer</button>
+      <button type="submit" className="btn btn-primary" disabled={isPending}>
+        {isPending ? 'Enregistrement…' : 'Enregistrer'}
+      </button>
     </form>
   );
-};
-
-export default ClubForm;
+}
