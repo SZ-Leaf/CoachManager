@@ -11,8 +11,17 @@ import * as teamApi from '../../../services/teamService.js';
 import AppPage from '../AppPage.jsx';
 import { Link } from 'react-router-dom';
 import { ROUTES } from '../../../utils/routes.js';
-import { formatPlayerPosition } from '../../../utils/playerPosition.js';
+import { formatPlayerPosition, PLAYER_POSITIONS } from '../../../utils/playerPosition.js';
+import { PLAYER_STATUSES } from '../../../utils/playerStatus.js';
 import { playerToFormInitialValues } from '../../../utils/playerFormValues.js';
+
+function comparePlayersByName(a, b) {
+  const last = a.lastname.localeCompare(b.lastname, 'fr', { sensitivity: 'base' });
+  if (last !== 0) {
+    return last;
+  }
+  return a.firstname.localeCompare(b.firstname, 'fr', { sensitivity: 'base' });
+}
 
 export default function PlayersPage() {
   const qc = useQueryClient();
@@ -20,6 +29,10 @@ export default function PlayersPage() {
   const [editingId, setEditingId] = useState(null);
   const [detail, setDetail] = useState(null);
   const [formError, setFormError] = useState('');
+  const [nameSort, setNameSort] = useState('asc');
+  const [filterPosition, setFilterPosition] = useState('');
+  const [filterStatus, setFilterStatus] = useState('');
+  const [filterTeamId, setFilterTeamId] = useState('');
 
   const teamsQuery = useQuery({
     queryKey: ['teams'],
@@ -78,16 +91,116 @@ export default function PlayersPage() {
   const players = playersQuery.data?.items ?? [];
   const teams = teamsQuery.data?.items ?? [];
 
+  const teamsSorted = useMemo(
+    () => [...teams].sort((a, b) => a.name.localeCompare(b.name, 'fr', { sensitivity: 'base' })),
+    [teams],
+  );
+
+  const filteredPlayers = useMemo(() => {
+    let list = [...players];
+    if (filterPosition) {
+      list = list.filter((p) => String(p.position ?? '') === filterPosition);
+    }
+    if (filterStatus) {
+      list = list.filter((p) => String(p.status ?? '') === filterStatus);
+    }
+    if (filterTeamId) {
+      list = list.filter((p) => String(p.teamId ?? '') === filterTeamId);
+    }
+    list.sort((a, b) => (nameSort === 'asc' ? comparePlayersByName(a, b) : comparePlayersByName(b, a)));
+    return list;
+  }, [players, filterPosition, filterStatus, filterTeamId, nameSort]);
+
+  const hasActiveFilters = Boolean(filterPosition || filterStatus || filterTeamId || nameSort !== 'asc');
+
+  const resetFilters = () => {
+    setNameSort('asc');
+    setFilterPosition('');
+    setFilterStatus('');
+    setFilterTeamId('');
+  };
+
   return (
     <AppPage
       title="Joueurs"
       description="Fiches joueurs liées à vos équipes."
     >
       <div className="players-page crud-page">
-        <div className="crud-toolbar">
-          <button type="button" className="btn btn-primary" onClick={openCreate}>
-            + Nouveau joueur
-          </button>
+        <div className="crud-toolbar players-page__toolbar">
+          <div className="players-page__toolbar-strip">
+            <button type="button" className="btn btn-primary" onClick={openCreate}>
+              + Nouveau joueur
+            </button>
+            <select
+              aria-label="Tri par ordre alphabétique"
+              value={nameSort}
+              onChange={(e) => setNameSort(e.target.value)}
+            >
+              <option value="asc">Nom : A → Z</option>
+              <option value="desc">Nom : Z → A</option>
+            </select>
+            <select
+              aria-label="Filtrer par poste"
+              value={filterPosition}
+              onChange={(e) => setFilterPosition(e.target.value)}
+            >
+              <option value="">Tous les postes</option>
+              {PLAYER_POSITIONS.map((opt) => (
+                <option key={opt.value} value={opt.value}>
+                  {opt.label}
+                </option>
+              ))}
+            </select>
+            <select
+              aria-label="Filtrer par statut"
+              value={filterStatus}
+              onChange={(e) => setFilterStatus(e.target.value)}
+            >
+              <option value="">Tous les statuts</option>
+              {PLAYER_STATUSES.map((opt) => (
+                <option key={opt.value} value={opt.value}>
+                  {opt.label}
+                </option>
+              ))}
+            </select>
+            <select
+              aria-label="Filtrer par équipe"
+              value={filterTeamId}
+              onChange={(e) => setFilterTeamId(e.target.value)}
+            >
+              <option value="">Toutes les équipes</option>
+              {teamsSorted.map((t) => (
+                <option key={t.id} value={String(t.id)}>
+                  {t.name}
+                </option>
+              ))}
+            </select>
+            {hasActiveFilters ? (
+              <button
+                type="button"
+                className="btn btn-secondary players-page__reset-btn"
+                onClick={resetFilters}
+                aria-label="Réinitialiser les filtres"
+                title="Réinitialiser les filtres"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+                  <path d="M3 3v5h5" />
+                </svg>
+              </button>
+            ) : null}
+          </div>
         </div>
 
         {playersQuery.isLoading ? <Spinner /> : null}
@@ -102,7 +215,14 @@ export default function PlayersPage() {
           />
         ) : null}
 
-        {players.length > 0 ? (
+        {!playersQuery.isLoading && players.length > 0 && filteredPlayers.length === 0 ? (
+          <EmptyState
+            title="Aucun résultat"
+            description="Aucun joueur ne correspond aux filtres sélectionnés."
+          />
+        ) : null}
+
+        {filteredPlayers.length > 0 ? (
           <div className="crud-table-wrap">
             <table className="crud-table">
               <thead>
@@ -114,14 +234,18 @@ export default function PlayersPage() {
                 </tr>
               </thead>
               <tbody>
-                {players.map((p) => (
+                {filteredPlayers.map((p) => (
                   <tr key={p.id}>
                     <td data-label="Nom">
                       <Link to={ROUTES.PLAYER_DETAILS.replace(':id', p.id)} className="table-link">
                         {p.firstname} {p.lastname}
                       </Link>
                     </td>
-                    <td data-label="Équipe">{p.teamId ?? '—'}</td>
+                    <td data-label="Équipe">
+                      {p.teamId
+                        ? teams.find((t) => String(t.id) === String(p.teamId))?.name ?? '—'
+                        : '—'}
+                    </td>
                     <td data-label="Poste">{formatPlayerPosition(p.position) || '—'}</td>
                     <td data-label="Actions" className="crud-table__actions crud-table__actions--split">
                       <div className="crud-table__actions-start">
